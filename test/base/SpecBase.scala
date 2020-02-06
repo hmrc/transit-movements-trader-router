@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.transitmovementstraderrouter.config
+package base
 
-import javax.inject.{Inject, Singleton}
+import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
+import org.scalatestplus.mockito.MockitoSugar
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Configuration
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+import play.api.inject.guice.GuiceApplicationBuilder
+import uk.gov.hmrc.http.HeaderCarrier
 
-@Singleton
-class AppConfig @Inject()(config: Configuration, servicesConfig: ServicesConfig) {
+trait SpecBase extends FreeSpec with MustMatchers with GuiceOneAppPerSuite with MockitoSugar with OptionValues {
+  implicit val hc: HeaderCarrier = HeaderCarrier()
 
-  val authBaseUrl: String = servicesConfig.baseUrl("auth")
-
-  val auditingEnabled: Boolean = config.get[Boolean]("auditing.enabled")
-  val graphiteHost: String     = config.get[String]("microservice.metrics.graphite.host")
+  protected def applicationBuilder: GuiceApplicationBuilder =
+    new GuiceApplicationBuilder()
+      .configure(Configuration("metrics.enabled" -> "false"))
 }
