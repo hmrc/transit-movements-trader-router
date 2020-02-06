@@ -39,7 +39,7 @@ class MessageController @Inject()(appConfig: AppConfig,
     request.headers.get("X-Message-Type") match {
       case Some(MessageType.GoodsReleaseNotification) => connector.sendMessage(request.body.asText.getOrElse(""), request.headers.headers)
         .map(_ => Ok)
-        .recover(logException)
+        .recover(withPostErrorRecovery)
       case Some(messageType) =>
         Logger.error(s"$messageType is not acceptable")
         Future.successful(NotAcceptable)
@@ -49,7 +49,7 @@ class MessageController @Inject()(appConfig: AppConfig,
     }
   }
 
-  private def logException: PartialFunction[Throwable, Result] = {
+  private def withPostErrorRecovery: PartialFunction[Throwable, Result] = {
     case bre: BadRequestException =>
       Logger.error(s"BadRequest returned from POST: $bre", bre)
       BadRequest
