@@ -38,8 +38,8 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
     reset(mockConnector)
   }
 
-  "MessageController" - {
-    "return status as OK for the message Type Goods release" in {
+  "MessageController must" - {
+    "return ok for the message Type Goods release" in {
       when(mockConnector.sendMessage(any(), any())(any(), any())).thenReturn(Future.successful(HttpResponse(OK)))
 
       val request = FakeRequest("POST", routes.MessageController.handleMessageType().url)
@@ -50,7 +50,7 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
       status(result) mustBe OK
     }
 
-    "return correct status when send message returns not found exception" in {
+    "return not found when service returns not found exception" in {
       when(mockConnector.sendMessage(any(), any())(any(), any())).thenReturn(Future.failed(new NotFoundException("not found")))
 
       val request = FakeRequest("POST", routes.MessageController.handleMessageType().url)
@@ -60,7 +60,7 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
       status(result) mustBe NOT_FOUND
     }
 
-    "return correct status when send message returns Bad request exception" in {
+    "return a bad request when service returns Bad request exception" in {
       when(mockConnector.sendMessage(any(), any())(any(), any())).thenReturn(Future.failed(new BadRequestException("bad request")))
 
       val request = FakeRequest("POST", routes.MessageController.handleMessageType().url)
@@ -70,7 +70,7 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
       status(result) mustBe BAD_REQUEST
     }
 
-    "return an exception when request has no header" in {
+    "return a bad request when request has no header" in {
       when(mockConnector.sendMessage(any(), any())(any(), any())).thenReturn(Future.successful(HttpResponse(OK)))
 
       val fakeRequest = FakeRequest("POST", routes.MessageController.handleMessageType().url)
