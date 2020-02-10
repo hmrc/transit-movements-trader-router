@@ -49,7 +49,7 @@ class DestinationConnectorSpec extends FreeSpec
 
   override lazy val app: Application = new GuiceApplicationBuilder()
     .configure(
-      conf = "microservice.services.destination.port" -> server.port()
+      conf = "microservice.services.trader-at-destination.port" -> server.port()
     )
     .build()
 

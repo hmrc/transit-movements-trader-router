@@ -24,8 +24,8 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 class AppConfig @Inject()(config: Configuration, servicesConfig: ServicesConfig) {
 
   val authBaseUrl: String = servicesConfig.baseUrl("auth")
-  val traderAtDestinationServiceName: String = config.get[String]("microservice.services.destination.startUrl")
-  val traderAtDestinationUrl: String = s"${servicesConfig.baseUrl("destination")}/$traderAtDestinationServiceName"
+  val traderAtDestinationServiceName: String = config.get[String]("microservice.services.trader-at-destination.startUrl")
+  val traderAtDestinationUrl: String = s"${servicesConfig.baseUrl("trader-at-destination")}/$traderAtDestinationServiceName"
 
   val auditingEnabled: Boolean = config.get[Boolean]("auditing.enabled")
   val graphiteHost: String     = config.get[String]("microservice.metrics.graphite.host")

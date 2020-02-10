@@ -23,6 +23,7 @@ import config.AppConfig
 import connector.DestinationConnector
 import play.api.Logger
 import uk.gov.hmrc.http.{BadRequestException, NotFoundException, Upstream4xxResponse}
+import utils.MessageType
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal

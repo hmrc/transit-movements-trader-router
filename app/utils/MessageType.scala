@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package controllers
+package utils
 
 object MessageType {
-
   val ArrivalNotification = "IE007"
   val GoodsReleaseNotification = "IE025"
 }
