@@ -14,20 +14,21 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.transitmovementstraderrouter.controllers
+package connector
 
-import javax.inject.{Inject, Singleton}
-import play.api.mvc.{Action, AnyContent, ControllerComponents}
-import uk.gov.hmrc.play.bootstrap.controller.BackendController
-import uk.gov.hmrc.transitmovementstraderrouter.config.AppConfig
+import config.AppConfig
+import javax.inject.Inject
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-@Singleton()
-class MicroserviceHelloWorldController @Inject()(appConfig: AppConfig, cc: ControllerComponents)
-    extends BackendController(cc) {
+class DestinationConnector @Inject()(val config: AppConfig, val http: HttpClient)(implicit ec: ExecutionContext) {
 
-  def hello(): Action[AnyContent] = Action.async { implicit request =>
-    Future.successful(Ok("Hello world"))
+  def sendMessage(responseData: String, headers: Seq[(String, String)])(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = {
+
+    val serviceUrl = s"${config.traderAtDestinationUrl}/message"
+
+    http.POSTString(serviceUrl, responseData, headers)
   }
 }
