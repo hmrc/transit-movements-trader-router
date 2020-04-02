@@ -43,7 +43,7 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
       when(mockConnector.sendMessage(any(), any())(any(), any())).thenReturn(Future.successful(HttpResponse(OK)))
 
       val request = FakeRequest("POST", routes.MessageController.handleMessageType().url)
-        .withHeaders(("X-Message-Type", "IE025"))
+        .withHeaders(("X-Message-Type", "IE025"),("X-Message-Sender", "MDTP-1-1"))
         .withXmlBody(<xml>test</xml>)
 
       val result = route(application, request).value
@@ -54,7 +54,8 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
       when(mockConnector.sendMessage(any(), any())(any(), any())).thenReturn(Future.failed(new NotFoundException("not found")))
 
       val request = FakeRequest("POST", routes.MessageController.handleMessageType().url)
-        .withHeaders(("X-Message-Type", "IE025"))
+        .withHeaders(("X-Message-Type", "IE025"),("X-Message-Sender", "MDTP-1-1"))
+        .withXmlBody(<xml>test</xml>)
 
       val result = route(application, request).value
       status(result) mustBe NOT_FOUND
@@ -64,7 +65,8 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
       when(mockConnector.sendMessage(any(), any())(any(), any())).thenReturn(Future.failed(new BadRequestException("bad request")))
 
       val request = FakeRequest("POST", routes.MessageController.handleMessageType().url)
-        .withHeaders(("X-Message-Type", "IE025"))
+        .withHeaders(("X-Message-Type", "IE025"),("X-Message-Sender", "MDTP-1-1"))
+        .withXmlBody(<xml>test</xml>)
 
       val result = route(application, request).value
       status(result) mustBe BAD_REQUEST
@@ -74,6 +76,7 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
       when(mockConnector.sendMessage(any(), any())(any(), any())).thenReturn(Future.successful(HttpResponse(OK)))
 
       val fakeRequest = FakeRequest("POST", routes.MessageController.handleMessageType().url)
+        .withXmlBody(<xml>test</xml>)
 
       val result = route(application, fakeRequest).value
       status(result) mustBe BAD_REQUEST
@@ -83,6 +86,7 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
       when(mockConnector.sendMessage(any(), any())(any(), any())).thenReturn(Future.successful(HttpResponse(OK)))
 
       val fakeRequest = FakeRequest("POST", routes.MessageController.handleMessageType().url).withHeaders(("X-Message-Type", "XYD"))
+        .withXmlBody(<xml>test</xml>)
 
       val result = route(application, fakeRequest).value
       status(result) mustBe NOT_ACCEPTABLE

@@ -27,6 +27,7 @@ import utils.MessageType
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
+import scala.xml.NodeSeq
 
 @Singleton()
 class MessageController @Inject()(appConfig: AppConfig,
@@ -35,17 +36,18 @@ class MessageController @Inject()(appConfig: AppConfig,
                                  )(implicit val ec: ExecutionContext)
   extends BackendController(cc) {
 
-  def handleMessageType(): Action[AnyContent] = Action.async { implicit request =>
+  def handleMessageType(): Action[NodeSeq] = Action(parse.xml).async { implicit request =>
 
-    request.headers.get("X-Message-Type") match {
-      case Some(MessageType.GoodsReleaseNotification) => connector.sendMessage(request.body.asText.getOrElse(""), request.headers.headers)
+    (request.headers.get("X-Message-Type"), request.headers.get("X-Message-Sender")) match {
+      case (Some(MessageType.GoodsReleaseNotification), Some(messageSender)) =>
+        connector.sendMessage(request.body.toString(), messageSender)
         .map(_ => Ok)
         .recover(withPostErrorRecovery)
-      case Some(messageType) =>
+      case (Some(messageType), _) =>
         Logger.error(s"$messageType is not acceptable")
         Future.successful(NotAcceptable)
-      case None =>
-        Logger.error("BadRequest: missing header key 'X-Message-Type'")
+      case _ =>
+        Logger.error("BadRequest: either header key 'X-Message-Type' is missing or 'X-Message-Sender' is missing")
         Future.successful(BadRequest)
     }
   }

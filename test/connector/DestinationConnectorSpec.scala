@@ -43,9 +43,8 @@ class DestinationConnectorSpec extends FreeSpec
   with MockitoSugar {
 
   private val startUrl = "transit-movements-trader-at-destination"
-  val sampleXml = "<xml>test</xml>"
+  private val sampleXml = "<xml>test</xml>"
   implicit val hc: HeaderCarrier = HeaderCarrier()
-
 
   override lazy val app: Application = new GuiceApplicationBuilder()
     .configure(
@@ -55,18 +54,20 @@ class DestinationConnectorSpec extends FreeSpec
 
   lazy val connector: DestinationConnector = app.injector.instanceOf[DestinationConnector]
 
+  private val messageSender = "MDTP-1-1"
+
   "DestinationConnector" - {
     "must return status as OK for valid input request" in {
 
       server.stubFor(
-        post(urlEqualTo(s"/$startUrl/message"))
+        post(urlEqualTo(s"/$startUrl/movements/arrivals/$messageSender/goods-released"))
           .willReturn(
             aResponse()
               .withStatus(OK)
           )
       )
 
-      val result = connector.sendMessage(sampleXml, Seq.empty)
+      val result = connector.sendMessage(sampleXml, messageSender)
       result.futureValue.status mustBe OK
     }
 
@@ -77,14 +78,14 @@ class DestinationConnectorSpec extends FreeSpec
       forAll(errorResponses) {
         errorResponse =>
           server.stubFor(
-            post(urlEqualTo(s"/$startUrl/message"))
+            post(urlEqualTo(s"/$startUrl/movements/arrivals/$messageSender/goods-released"))
               .willReturn(
                 aResponse()
                   .withStatus(errorResponse)
               )
           )
 
-          val result = connector.sendMessage(sampleXml, Seq.empty)
+          val result = connector.sendMessage(sampleXml, messageSender)
           whenReady(result.failed) {
             _ mustBe an[Exception]
           }

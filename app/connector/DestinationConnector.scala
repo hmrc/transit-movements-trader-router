@@ -25,10 +25,11 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class DestinationConnector @Inject()(val config: AppConfig, val http: HttpClient)(implicit ec: ExecutionContext) {
 
-  def sendMessage(responseData: String, headers: Seq[(String, String)])(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = {
+  def sendMessage(responseData: String, messageSender: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = {
 
-    val serviceUrl = s"${config.traderAtDestinationUrl}/message"
+    val serviceUrl = s"${config.traderAtDestinationUrl}/movements/arrivals/$messageSender/goods-released"
 
+    val headers = Seq(("Content-Type", "application/xml"))
     http.POSTString(serviceUrl, responseData, headers)
   }
 }
