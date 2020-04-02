@@ -16,52 +16,35 @@
 
 package controllers
 
-import javax.inject.{Inject, Singleton}
-import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
-import uk.gov.hmrc.play.bootstrap.controller.BackendController
 import config.AppConfig
 import connector.DestinationConnector
+import javax.inject.Inject
 import play.api.Logger
-import uk.gov.hmrc.http.{BadRequestException, NotFoundException, Upstream4xxResponse}
-import utils.MessageType
+import play.api.mvc.{Action, ControllerComponents}
+import uk.gov.hmrc.play.bootstrap.controller.BackendController
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.control.NonFatal
+import scala.xml.NodeSeq
 
-@Singleton()
-class MessageController @Inject()(appConfig: AppConfig,
-                                  cc: ControllerComponents,
-                                  connector: DestinationConnector
-                                 )(implicit val ec: ExecutionContext)
-  extends BackendController(cc) {
+class MessageController @Inject()(
+  appConfig: AppConfig,
+  cc: ControllerComponents,
+  connector: DestinationConnector
+)(implicit val ec: ExecutionContext)
+    extends BackendController(cc) {
 
-  def handleMessageType(): Action[AnyContent] = Action.async { implicit request =>
+  private lazy val logger = Logger(getClass)
 
-    request.headers.get("X-Message-Type") match {
-      case Some(MessageType.GoodsReleaseNotification) => connector.sendMessage(request.body.asText.getOrElse(""), request.headers.headers)
-        .map(_ => Ok)
-        .recover(withPostErrorRecovery)
-      case Some(messageType) =>
-        Logger.error(s"$messageType is not acceptable")
-        Future.successful(NotAcceptable)
-      case None =>
-        Logger.error("BadRequest: missing header key 'X-Message-Type'")
-        Future.successful(BadRequest)
-    }
-  }
-
-  private def withPostErrorRecovery: PartialFunction[Throwable, Result] = {
-    case bre: BadRequestException =>
-      Logger.error(s"BadRequest returned from POST: $bre", bre)
-      BadRequest
-    case nfe: NotFoundException =>
-      Logger.error(s"NotFound returned from POST: $nfe", nfe)
-      NotFound
-    case e4xx: Upstream4xxResponse if e4xx.upstreamResponseCode == FORBIDDEN =>
-      Logger.error(s"Forbidden returned from POST: $e4xx", e4xx)
-      Forbidden
-    case NonFatal(e) =>
-      Logger.error(s"Could not POST: $e", e)
-      InternalServerError
+  def handleMessageType(): Action[NodeSeq] = Action.async(parse.xml) {
+    implicit request =>
+      request.headers.get("X-Message-Sender") match {
+        case Some(xMessageSender) =>
+          connector
+            .sendMessage(xMessageSender, request.body)
+            .map(response => Status(response.status))
+        case None =>
+          logger.error("BadRequest: missing header key X-Message-Sender")
+          Future.successful(BadRequest)
+      }
   }
 }

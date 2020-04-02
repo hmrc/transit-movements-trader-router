@@ -22,13 +22,21 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.xml.NodeSeq
 
-class DestinationConnector @Inject()(val config: AppConfig, val http: HttpClient)(implicit ec: ExecutionContext) {
+class DestinationConnector @Inject()(
+  val config: AppConfig,
+  val http: HttpClient
+)(implicit ec: ExecutionContext) {
 
-  def sendMessage(responseData: String, headers: Seq[(String, String)])(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = {
+  def sendMessage(
+    xMessageSender: String,
+    resquestData: NodeSeq
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = {
 
-    val serviceUrl = s"${config.traderAtDestinationUrl}/message"
+    val serviceUrl =
+      s"${config.traderAtDestinationUrl.baseUrl}/movements/arrivals/$xMessageSender/messages"
 
-    http.POSTString(serviceUrl, responseData, headers)
+    http.POSTString[HttpResponse](serviceUrl, resquestData.toString)
   }
 }
