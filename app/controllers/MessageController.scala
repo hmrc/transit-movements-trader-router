@@ -35,7 +35,7 @@ class MessageController @Inject()(
 
   private lazy val logger = Logger(getClass)
 
-  def handleMessageType(): Action[NodeSeq] = Action.async(parse.xml) {
+  def handleMessage(): Action[NodeSeq] = Action.async(parse.xml) {
     implicit request =>
       request.headers.get("X-Message-Sender") match {
         case Some(xMessageSender) =>

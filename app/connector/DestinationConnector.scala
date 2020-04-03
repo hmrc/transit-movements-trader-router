@@ -39,7 +39,7 @@ class DestinationConnector @Inject()(
     val serviceUrl =
       s"${config.traderAtDestinationUrl.baseUrl}/movements/arrivals/$xMessageSender/messages"
 
-    // TODO: Determine which headers are appropiate to send on
+    // TODO: Determine which headers need to be sent on
     http.POSTString[HttpResponse](
       serviceUrl,
       resquestData.toString,
