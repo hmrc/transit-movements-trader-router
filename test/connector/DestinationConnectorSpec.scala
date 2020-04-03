@@ -26,6 +26,7 @@ import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.Application
 import play.api.http.Status._
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.mvc.Headers
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -67,7 +68,7 @@ class DestinationConnectorSpec
           )
       )
 
-      val result = connector.sendMessage(xMessageSender, sampleXml)
+      val result = connector.sendMessage(xMessageSender, sampleXml, Headers())
       result.futureValue.status mustBe OK
     }
 
@@ -84,7 +85,7 @@ class DestinationConnectorSpec
             )
         )
 
-        val result = connector.sendMessage(xMessageSender, sampleXml)
+        val result = connector.sendMessage(xMessageSender, sampleXml, Headers())
 
         result.futureValue.status mustBe errorResponse
 
