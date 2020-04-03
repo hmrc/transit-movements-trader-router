@@ -50,11 +50,11 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
 
   "MessageController must" - {
     "return Ok when X-Message-Sender is defined and there is an Ok from upstream" in {
-      when(mockConnector.sendMessage(any(), any())(any()))
+      when(mockConnector.sendMessage(any(), any(), any())(any()))
         .thenReturn(Future.successful(HttpResponse(OK)))
 
       val request =
-        FakeRequest("POST", routes.MessageController.handleMessageType().url)
+        FakeRequest("POST", routes.MessageController.handleMessage().url)
           .withHeaders(
             "X-Message-Sender" -> xMessageSender,
             "Content-Type" -> "application/xml"
@@ -67,11 +67,11 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
     }
 
     "return a Bad Request when upstream returns a Bad Request" in {
-      when(mockConnector.sendMessage(any(), any())(any()))
+      when(mockConnector.sendMessage(any(), any(), any())(any()))
         .thenReturn(Future.successful(HttpResponse(BAD_REQUEST)))
 
       val request =
-        FakeRequest("POST", routes.MessageController.handleMessageType().url)
+        FakeRequest("POST", routes.MessageController.handleMessage().url)
           .withHeaders(
             "X-Message-Sender" -> xMessageSender,
             "Content-Type" -> "application/xml"
@@ -84,11 +84,11 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
     }
 
     "return a Not Found when upstream returns a Not Found" in {
-      when(mockConnector.sendMessage(any(), any())(any()))
+      when(mockConnector.sendMessage(any(), any(), any())(any()))
         .thenReturn(Future.successful(HttpResponse(NOT_FOUND)))
 
       val request =
-        FakeRequest("POST", routes.MessageController.handleMessageType().url)
+        FakeRequest("POST", routes.MessageController.handleMessage().url)
           .withHeaders(
             "X-Message-Sender" -> xMessageSender,
             "Content-Type" -> "application/xml"
@@ -101,11 +101,11 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
     }
 
     "return a Locked when upstream returns a Locked" in {
-      when(mockConnector.sendMessage(any(), any())(any()))
+      when(mockConnector.sendMessage(any(), any(), any())(any()))
         .thenReturn(Future.successful(HttpResponse(LOCKED)))
 
       val request =
-        FakeRequest("POST", routes.MessageController.handleMessageType().url)
+        FakeRequest("POST", routes.MessageController.handleMessage().url)
           .withHeaders(
             "X-Message-Sender" -> xMessageSender,
             "Content-Type" -> "application/xml"
@@ -118,11 +118,11 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
     }
 
     "return Internal Server Error when upstream returns an Internal Server Error" in {
-      when(mockConnector.sendMessage(any(), any())(any()))
+      when(mockConnector.sendMessage(any(), any(), any())(any()))
         .thenReturn(Future.successful(HttpResponse(INTERNAL_SERVER_ERROR)))
 
       val fakeRequest =
-        FakeRequest("POST", routes.MessageController.handleMessageType().url)
+        FakeRequest("POST", routes.MessageController.handleMessage().url)
           .withHeaders(
             "X-Message-Sender" -> xMessageSender,
             "Content-Type" -> "application/xml"
