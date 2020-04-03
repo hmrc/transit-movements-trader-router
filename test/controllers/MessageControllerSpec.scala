@@ -50,7 +50,7 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
 
   "MessageController must" - {
     "return Ok when X-Message-Sender is defined and there is an Ok from upstream" in {
-      when(mockConnector.sendMessage(any(), any())(any(), any()))
+      when(mockConnector.sendMessage(any(), any())(any()))
         .thenReturn(Future.successful(HttpResponse(OK)))
 
       val request =
@@ -67,7 +67,7 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
     }
 
     "return a Bad Request when upstream returns a Bad Request" in {
-      when(mockConnector.sendMessage(any(), any())(any(), any()))
+      when(mockConnector.sendMessage(any(), any())(any()))
         .thenReturn(Future.successful(HttpResponse(BAD_REQUEST)))
 
       val request =
@@ -84,7 +84,7 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
     }
 
     "return a Not Found when upstream returns a Not Found" in {
-      when(mockConnector.sendMessage(any(), any())(any(), any()))
+      when(mockConnector.sendMessage(any(), any())(any()))
         .thenReturn(Future.successful(HttpResponse(NOT_FOUND)))
 
       val request =
@@ -101,7 +101,7 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
     }
 
     "return a Locked when upstream returns a Locked" in {
-      when(mockConnector.sendMessage(any(), any())(any(), any()))
+      when(mockConnector.sendMessage(any(), any())(any()))
         .thenReturn(Future.successful(HttpResponse(LOCKED)))
 
       val request =
@@ -118,7 +118,7 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
     }
 
     "return Internal Server Error when upstream returns an Internal Server Error" in {
-      when(mockConnector.sendMessage(any(), any())(any(), any()))
+      when(mockConnector.sendMessage(any(), any())(any()))
         .thenReturn(Future.successful(HttpResponse(INTERNAL_SERVER_ERROR)))
 
       val fakeRequest =

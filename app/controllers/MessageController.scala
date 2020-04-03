@@ -40,7 +40,7 @@ class MessageController @Inject()(
       request.headers.get("X-Message-Sender") match {
         case Some(xMessageSender) =>
           connector
-            .sendMessage(xMessageSender, request.body)
+            .sendMessage(xMessageSender, request.body, request.headers)
             .map(response => Status(response.status))
         case None =>
           logger.error("BadRequest: missing header key X-Message-Sender")

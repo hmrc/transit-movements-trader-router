@@ -18,6 +18,7 @@ package connector
 
 import config.AppConfig
 import javax.inject.Inject
+import play.api.mvc.Headers
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
@@ -31,12 +32,18 @@ class DestinationConnector @Inject()(
 
   def sendMessage(
     xMessageSender: String,
-    resquestData: NodeSeq
-  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = {
+    resquestData: NodeSeq,
+    headers: Headers
+  )(implicit hc: HeaderCarrier): Future[HttpResponse] = {
 
     val serviceUrl =
       s"${config.traderAtDestinationUrl.baseUrl}/movements/arrivals/$xMessageSender/messages"
 
-    http.POSTString[HttpResponse](serviceUrl, resquestData.toString)
+    // TODO: Determine which headers are appropiate to send on
+    http.POSTString[HttpResponse](
+      serviceUrl,
+      resquestData.toString,
+      headers.headers
+    )
   }
 }

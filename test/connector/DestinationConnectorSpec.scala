@@ -16,9 +16,7 @@
 
 package connector
 
-import com.github.tomakehurst.wiremock.client.WireMock.aResponse
-import com.github.tomakehurst.wiremock.client.WireMock.post
-import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
+import com.github.tomakehurst.wiremock.client.WireMock._
 import helper.WireMockServerHandler
 import org.scalacheck.Gen
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
@@ -91,21 +89,6 @@ class DestinationConnectorSpec
         result.futureValue.status mustBe errorResponse
 
       }
-    }
-
-    "must add the Headers from the Header Carrier to the request" in {
-      server.stubFor(
-        post(urlEqualTo(s"/$startUrl/$xMessageSender/messages"))
-          .willReturn(
-            aResponse()
-              .withHeader("X-Test-Header", "X-Test-Header-Value")
-              .withStatus(200)
-          )
-      )
-
-      val result = connector.sendMessage(xMessageSender, sampleXml)
-
-      result.futureValue.status mustBe 200
     }
   }
 }
