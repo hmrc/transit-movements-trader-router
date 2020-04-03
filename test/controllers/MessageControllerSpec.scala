@@ -24,68 +24,114 @@ import org.mockito.Mockito.{reset, when}
 import connector.DestinationConnector
 import org.scalatest.BeforeAndAfterEach
 import play.api.inject.bind
-import uk.gov.hmrc.http.{BadRequestException, HttpResponse, NotFoundException}
+import uk.gov.hmrc.http.{
+  BadRequestException,
+  HttpResponse,
+  InternalServerException,
+  LockedException,
+  NotFoundException
+}
 
 import scala.concurrent.Future
 
 class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
 
   private val mockConnector = mock[DestinationConnector]
-  private val application = applicationBuilder.overrides(bind[DestinationConnector].toInstance(mockConnector)).build()
+  private val application = applicationBuilder
+    .overrides(bind[DestinationConnector].toInstance(mockConnector))
+    .build()
 
   override def beforeEach(): Unit = {
     super.beforeEach()
     reset(mockConnector)
   }
 
-  "MessageController must" - {
-    "return ok for the message Type Goods release" in {
-      when(mockConnector.sendMessage(any(), any())(any(), any())).thenReturn(Future.successful(HttpResponse(OK)))
+  private val xMessageSender = "MDTP-1-1"
 
-      val request = FakeRequest("POST", routes.MessageController.handleMessageType().url)
-        .withHeaders(("X-Message-Type", "IE025"))
-        .withXmlBody(<xml>test</xml>)
+  "MessageController must" - {
+    "return Ok when X-Message-Sender is defined and there is an Ok from upstream" in {
+      when(mockConnector.sendMessage(any(), any())(any()))
+        .thenReturn(Future.successful(HttpResponse(OK)))
+
+      val request =
+        FakeRequest("POST", routes.MessageController.handleMessageType().url)
+          .withHeaders(
+            "X-Message-Sender" -> xMessageSender,
+            "Content-Type" -> "application/xml"
+          )
+          .withXmlBody(<xml>test</xml>)
 
       val result = route(application, request).value
+
       status(result) mustBe OK
     }
 
-    "return not found when service returns not found exception" in {
-      when(mockConnector.sendMessage(any(), any())(any(), any())).thenReturn(Future.failed(new NotFoundException("not found")))
+    "return a Bad Request when upstream returns a Bad Request" in {
+      when(mockConnector.sendMessage(any(), any())(any()))
+        .thenReturn(Future.successful(HttpResponse(BAD_REQUEST)))
 
-      val request = FakeRequest("POST", routes.MessageController.handleMessageType().url)
-        .withHeaders(("X-Message-Type", "IE025"))
+      val request =
+        FakeRequest("POST", routes.MessageController.handleMessageType().url)
+          .withHeaders(
+            "X-Message-Sender" -> xMessageSender,
+            "Content-Type" -> "application/xml"
+          )
+          .withXmlBody(<xml>test</xml>)
 
       val result = route(application, request).value
+
+      status(result) mustBe BAD_REQUEST
+    }
+
+    "return a Not Found when upstream returns a Not Found" in {
+      when(mockConnector.sendMessage(any(), any())(any()))
+        .thenReturn(Future.successful(HttpResponse(NOT_FOUND)))
+
+      val request =
+        FakeRequest("POST", routes.MessageController.handleMessageType().url)
+          .withHeaders(
+            "X-Message-Sender" -> xMessageSender,
+            "Content-Type" -> "application/xml"
+          )
+          .withXmlBody(<xml>test</xml>)
+
+      val result = route(application, request).value
+
       status(result) mustBe NOT_FOUND
     }
 
-    "return a bad request when service returns Bad request exception" in {
-      when(mockConnector.sendMessage(any(), any())(any(), any())).thenReturn(Future.failed(new BadRequestException("bad request")))
+    "return a Locked when upstream returns a Locked" in {
+      when(mockConnector.sendMessage(any(), any())(any()))
+        .thenReturn(Future.successful(HttpResponse(LOCKED)))
 
-      val request = FakeRequest("POST", routes.MessageController.handleMessageType().url)
-        .withHeaders(("X-Message-Type", "IE025"))
+      val request =
+        FakeRequest("POST", routes.MessageController.handleMessageType().url)
+          .withHeaders(
+            "X-Message-Sender" -> xMessageSender,
+            "Content-Type" -> "application/xml"
+          )
+          .withXmlBody(<xml>test</xml>)
 
       val result = route(application, request).value
-      status(result) mustBe BAD_REQUEST
+
+      status(result) mustBe LOCKED
     }
 
-    "return a bad request when request has no header" in {
-      when(mockConnector.sendMessage(any(), any())(any(), any())).thenReturn(Future.successful(HttpResponse(OK)))
+    "return Internal Server Error when upstream returns an Internal Server Error" in {
+      when(mockConnector.sendMessage(any(), any())(any()))
+        .thenReturn(Future.successful(HttpResponse(INTERNAL_SERVER_ERROR)))
 
-      val fakeRequest = FakeRequest("POST", routes.MessageController.handleMessageType().url)
-
-      val result = route(application, fakeRequest).value
-      status(result) mustBe BAD_REQUEST
-    }
-
-    "return Not acceptable status when message type is not valid" in {
-      when(mockConnector.sendMessage(any(), any())(any(), any())).thenReturn(Future.successful(HttpResponse(OK)))
-
-      val fakeRequest = FakeRequest("POST", routes.MessageController.handleMessageType().url).withHeaders(("X-Message-Type", "XYD"))
+      val fakeRequest =
+        FakeRequest("POST", routes.MessageController.handleMessageType().url)
+          .withHeaders(
+            "X-Message-Sender" -> xMessageSender,
+            "Content-Type" -> "application/xml"
+          )
+          .withXmlBody(<xml>test</xml>)
 
       val result = route(application, fakeRequest).value
-      status(result) mustBe NOT_ACCEPTABLE
+
+      status(result) mustBe INTERNAL_SERVER_ERROR
     }
   }
 }

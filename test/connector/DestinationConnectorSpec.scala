@@ -16,15 +16,12 @@
 
 package connector
 
-import com.github.tomakehurst.wiremock.client.WireMock.aResponse
-import com.github.tomakehurst.wiremock.client.WireMock.post
-import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
+import com.github.tomakehurst.wiremock.client.WireMock._
 import helper.WireMockServerHandler
 import org.scalacheck.Gen
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.{FreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.Application
 import play.api.http.Status._
@@ -33,64 +30,65 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class DestinationConnectorSpec extends FreeSpec
-  with MustMatchers
-  with GuiceOneAppPerSuite
-  with ScalaFutures
-  with IntegrationPatience
-  with WireMockServerHandler
-  with ScalaCheckPropertyChecks
-  with MockitoSugar {
+class DestinationConnectorSpec
+    extends FreeSpec
+    with MustMatchers
+    with ScalaFutures
+    with IntegrationPatience
+    with WireMockServerHandler
+    with ScalaCheckPropertyChecks
+    with MockitoSugar {
 
-  private val startUrl = "transit-movements-trader-at-destination"
-  val sampleXml = "<xml>test</xml>"
-  implicit val hc: HeaderCarrier = HeaderCarrier()
+  private val startUrl =
+    "transit-movements-trader-at-destination/movements/arrivals"
+  val sampleXml = <xml>test</xml>
+  val xMessageSender = "MDTP-1-1"
 
+  implicit val hc: HeaderCarrier =
+    HeaderCarrier().withExtraHeaders("X-Test-Header" -> "X-Test-Header-Value")
 
-  override lazy val app: Application = new GuiceApplicationBuilder()
+  lazy val app: Application = new GuiceApplicationBuilder()
     .configure(
       conf = "microservice.services.trader-at-destination.port" -> server.port()
     )
     .build()
 
-  lazy val connector: DestinationConnector = app.injector.instanceOf[DestinationConnector]
+  lazy val connector =
+    app.injector.instanceOf[DestinationConnector]
 
   "DestinationConnector" - {
     "must return status as OK for valid input request" in {
 
       server.stubFor(
-        post(urlEqualTo(s"/$startUrl/message"))
+        post(urlEqualTo(s"/$startUrl/$xMessageSender/messages"))
           .willReturn(
             aResponse()
               .withStatus(OK)
           )
       )
 
-      val result = connector.sendMessage(sampleXml, Seq.empty)
+      val result = connector.sendMessage(xMessageSender, sampleXml)
       result.futureValue.status mustBe OK
     }
 
-    "must return an exception when an error response is returned from sendMessage" in {
+    "must return a HttpResponse with that status code" in {
 
       val errorResponses: Gen[Int] = Gen.chooseNum(400, 599)
 
-      forAll(errorResponses) {
-        errorResponse =>
-          server.stubFor(
-            post(urlEqualTo(s"/$startUrl/message"))
-              .willReturn(
-                aResponse()
-                  .withStatus(errorResponse)
-              )
-          )
+      forAll(errorResponses) { errorResponse =>
+        server.stubFor(
+          post(urlEqualTo(s"/$startUrl/$xMessageSender/messages"))
+            .willReturn(
+              aResponse()
+                .withStatus(errorResponse)
+            )
+        )
 
-          val result = connector.sendMessage(sampleXml, Seq.empty)
-          whenReady(result.failed) {
-            _ mustBe an[Exception]
-          }
+        val result = connector.sendMessage(xMessageSender, sampleXml)
+
+        result.futureValue.status mustBe errorResponse
+
       }
     }
   }
 }
-
-

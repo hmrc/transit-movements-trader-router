@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
-package utils
+import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 
-object MessageType {
-  val ArrivalNotification = "IE007"
-  val GoodsReleaseNotification = "IE025"
+package object connector {
+  implicit val noExceptionHttpReads: HttpReads[HttpResponse] =
+    new HttpReads[HttpResponse] {
+      override def read(method: String,
+                        url: String,
+                        response: HttpResponse): HttpResponse = response
+    }
 }
