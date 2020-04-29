@@ -37,7 +37,7 @@ class DestinationConnector @Inject()(
   )(implicit hc: HeaderCarrier): Future[HttpResponse] = {
 
     val serviceUrl =
-      s"${config.traderAtDestinationUrl.baseUrl}/movements/arrivals/$xMessageSender/messages"
+      s"${config.traderAtDestinationUrl.baseUrl}/movements/arrivals/$xMessageSender/messages/eis"
 
     // TODO: Determine which headers need to be sent on
     http.POSTString[HttpResponse](
