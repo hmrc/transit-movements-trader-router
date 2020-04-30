@@ -61,7 +61,7 @@ class DestinationConnectorSpec
     "must return status as OK for valid input request" in {
 
       server.stubFor(
-        post(urlEqualTo(s"/$startUrl/$xMessageSender/messages"))
+        post(urlEqualTo(s"/$startUrl/$xMessageSender/messages/eis"))
           .willReturn(
             aResponse()
               .withStatus(OK)
@@ -78,7 +78,7 @@ class DestinationConnectorSpec
 
       forAll(errorResponses) { errorResponse =>
         server.stubFor(
-          post(urlEqualTo(s"/$startUrl/$xMessageSender/messages"))
+          post(urlEqualTo(s"/$startUrl/$xMessageSender/messages/eis"))
             .willReturn(
               aResponse()
                 .withStatus(errorResponse)
