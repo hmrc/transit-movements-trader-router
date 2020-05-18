@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-package connector
+package connectors
 
 import config.AppConfig
 import javax.inject.Inject
 import play.api.Logger
 import play.api.mvc.Headers
+import play.utils.UriEncoding
+import java.nio.charset.StandardCharsets.UTF_8
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
@@ -43,8 +45,9 @@ class DestinationConnector @Inject()(
     Log.debug(s"Call trader at destination service with header: $headers")
     Log.debug(s"Call trader at destination service with hc: $hc")
 
+    val messageSender: String = UriEncoding.encodePathSegment(xMessageSender, UTF_8.name)
     val serviceUrl =
-      s"${config.traderAtDestinationUrl.baseUrl}/movements/arrivals/$xMessageSender/messages/eis"
+      s"${config.traderAtDestinationUrl.baseUrl}/movements/arrivals/$messageSender/messages/eis"
 
     Log.debug(s"Call trader at destination service: $serviceUrl")
 

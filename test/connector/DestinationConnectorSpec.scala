@@ -17,6 +17,7 @@
 package connector
 
 import com.github.tomakehurst.wiremock.client.WireMock._
+import connectors.DestinationConnector
 import helper.WireMockServerHandler
 import org.scalacheck.Gen
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
@@ -28,8 +29,6 @@ import play.api.http.Status._
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.Headers
 import uk.gov.hmrc.http.HeaderCarrier
-
-import scala.concurrent.ExecutionContext.Implicits.global
 
 class DestinationConnectorSpec
     extends FreeSpec

@@ -17,20 +17,14 @@
 package controllers
 
 import base.SpecBase
-import play.api.test.Helpers._
-import play.api.test.FakeRequest
+import connectors.DestinationConnector
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{reset, when}
-import connector.DestinationConnector
 import org.scalatest.BeforeAndAfterEach
 import play.api.inject.bind
-import uk.gov.hmrc.http.{
-  BadRequestException,
-  HttpResponse,
-  InternalServerException,
-  LockedException,
-  NotFoundException
-}
+import play.api.test.FakeRequest
+import play.api.test.Helpers._
+import uk.gov.hmrc.http.HttpResponse
 
 import scala.concurrent.Future
 
