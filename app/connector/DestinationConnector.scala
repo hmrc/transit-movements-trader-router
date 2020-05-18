@@ -39,12 +39,15 @@ class DestinationConnector @Inject()(
                    headers: Headers
   )(implicit hc: HeaderCarrier): Future[HttpResponse] = {
 
+    Log.debug(s"Call trader at destination service with request: $requestData")
+    Log.debug(s"Call trader at destination service with header: $headers")
+    Log.debug(s"Call trader at destination service with hc: $hc")
+
     val serviceUrl =
       s"${config.traderAtDestinationUrl.baseUrl}/movements/arrivals/$xMessageSender/messages/eis"
 
     Log.debug(s"Call trader at destination service: $serviceUrl")
-    Log.debug(s"Call trader at destination service with request: $requestData")
-    Log.debug(s"Call trader at destination service with header: $headers")
+
     // TODO: Determine which headers need to be sent on
     http.POSTString[HttpResponse](
       serviceUrl,
