@@ -18,10 +18,11 @@ package connectors
 
 import config.AppConfig
 import javax.inject.Inject
-import play.api.Logger
+import play.api.{Configuration, Logger}
 import play.api.mvc.Headers
 import play.utils.UriEncoding
 import java.nio.charset.StandardCharsets.UTF_8
+
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
@@ -33,22 +34,20 @@ class DestinationConnector @Inject()(
   val http: HttpClient
 )(implicit ec: ExecutionContext) {
 
-  val Log: Logger = Logger(getClass)
+  val logger: Logger = Logger(getClass)
 
   def sendMessage(
-                   xMessageSender: String,
-                   requestData: NodeSeq,
-                   headers: Headers
+    xMessageSender: String,
+    requestData: NodeSeq,
+    headers: Headers
   )(implicit hc: HeaderCarrier): Future[HttpResponse] = {
-
-    Log.debug(s"Call trader at destination service with request: $requestData")
-    Log.debug(s"Call trader at destination service with header: $headers")
-    Log.debug(s"Call trader at destination service with hc: $hc")
-
     val serviceUrl =
-      s"${config.traderAtDestinationUrl.baseUrl}/movements/arrivals/$xMessageSender/messages/eis"
+      s"${config.traderAtDestinationUrl.protocol}://${config.traderAtDestinationUrl.host}/${config.traderAtDestinationUrl.startUrl}/movements/arrivals/$xMessageSender/messages/eis"
 
-    Log.debug(s"Call trader at destination service: $serviceUrl")
+    val debugMessage =
+      s"Call trader at destination service: $serviceUrl"
+
+    logger.debug(debugMessage)
 
     // TODO: Determine which headers need to be sent on
     http.POSTString[HttpResponse](

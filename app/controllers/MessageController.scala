@@ -42,8 +42,6 @@ class MessageController @Inject()(
           connector
             .sendMessage(xMessageSender, request.body, request.headers)
             .map(response => {
-              logger.debug(s"Got this JSON: ${response.json}")
-              logger.debug(s"Got this body: ${response.body}")
               Status(response.status)
             })
         case None =>
