@@ -41,7 +41,11 @@ class MessageController @Inject()(
         case Some(xMessageSender) =>
           connector
             .sendMessage(xMessageSender, request.body, request.headers)
-            .map(response => Status(response.status))
+            .map(response => {
+              logger.debug(s"Got this JSON: ${response.json}")
+              logger.debug(s"Got this body: ${response.body}")
+              Status(response.status)
+            })
         case None =>
           logger.error("BadRequest: missing header key X-Message-Sender")
           Future.successful(BadRequest)

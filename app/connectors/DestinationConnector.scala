@@ -45,9 +45,8 @@ class DestinationConnector @Inject()(
     Log.debug(s"Call trader at destination service with header: $headers")
     Log.debug(s"Call trader at destination service with hc: $hc")
 
-    val messageSender: String = UriEncoding.encodePathSegment(xMessageSender, UTF_8.name)
     val serviceUrl =
-      s"${config.traderAtDestinationUrl.baseUrl}/movements/arrivals/$messageSender/messages/eis"
+      s"${config.traderAtDestinationUrl.baseUrl}/movements/arrivals/$xMessageSender/messages/eis"
 
     Log.debug(s"Call trader at destination service: $serviceUrl")
 
