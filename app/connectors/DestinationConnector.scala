@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package connector
+package connectors
 
 import config.AppConfig
 import javax.inject.Inject
@@ -35,20 +35,20 @@ class DestinationConnector @Inject()(
 
   def sendMessage(
     xMessageSender: String,
-    resquestData: NodeSeq,
+    requestData: NodeSeq,
     headers: Headers
   )(implicit hc: HeaderCarrier): Future[HttpResponse] = {
 
     val serviceUrl =
       s"${config.traderAtDestinationUrl.baseUrl}/movements/arrivals/$xMessageSender/messages/eis"
 
-    val header = headers.headers.filter(x => x._1 == "X-Message-Sender" || x._1 == "X-Message-Type" || x._1 == "Content-Type")
+    val header = headers.headers.filter(header => header._1 == "X-Message-Sender" || header._1 == "X-Message-Type" || header._1 == "Content-Type")
     Log.debug(s"updated header : $header")
 
     // TODO: Determine which headers need to be sent on
     http.POSTString[HttpResponse](
       serviceUrl,
-      resquestData.toString,
+      requestData.toString,
       header
     )
   }

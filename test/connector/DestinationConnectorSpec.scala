@@ -17,6 +17,7 @@
 package connector
 
 import com.github.tomakehurst.wiremock.client.WireMock._
+import connectors.DestinationConnector
 import helper.WireMockServerHandler
 import org.scalacheck.Gen
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
@@ -29,7 +30,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.Headers
 import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.xml.Elem
 
 class DestinationConnectorSpec
     extends FreeSpec
@@ -42,7 +43,7 @@ class DestinationConnectorSpec
 
   private val startUrl =
     "transit-movements-trader-at-destination/movements/arrivals"
-  val sampleXml = <xml>test</xml>
+  val sampleXml: Elem = <xml>test</xml>
   val xMessageSender = "MDTP-1-1"
 
   implicit val hc: HeaderCarrier =
@@ -54,7 +55,7 @@ class DestinationConnectorSpec
     )
     .build()
 
-  lazy val connector =
+  lazy val connector: DestinationConnector =
     app.injector.instanceOf[DestinationConnector]
 
   "DestinationConnector" - {

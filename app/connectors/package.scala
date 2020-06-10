@@ -16,7 +16,7 @@
 
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 
-package object connector {
+package object connectors {
   implicit val noExceptionHttpReads: HttpReads[HttpResponse] =
     new HttpReads[HttpResponse] {
       override def read(method: String,
