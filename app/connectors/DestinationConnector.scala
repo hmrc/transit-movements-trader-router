@@ -43,7 +43,6 @@ class DestinationConnector @Inject()(
       s"${config.traderAtDestinationUrl.baseUrl}/movements/arrivals/$xMessageSender/messages/eis"
 
     val header = headers.headers.filter(header => header._1 == "X-Message-Sender" || header._1 == "X-Message-Type" || header._1 == "Content-Type")
-    Log.debug(s"updated header : $header")
 
     // TODO: Determine which headers need to be sent on
     http.POSTString[HttpResponse](
