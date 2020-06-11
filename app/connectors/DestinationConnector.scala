@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package connector
+package connectors
 
 import config.AppConfig
 import javax.inject.Inject
+import play.api.Logger
 import play.api.mvc.Headers
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
@@ -30,20 +31,24 @@ class DestinationConnector @Inject()(
   val http: HttpClient
 )(implicit ec: ExecutionContext) {
 
+  val Log: Logger = Logger(getClass)
+
   def sendMessage(
     xMessageSender: String,
-    resquestData: NodeSeq,
+    requestData: NodeSeq,
     headers: Headers
   )(implicit hc: HeaderCarrier): Future[HttpResponse] = {
 
     val serviceUrl =
       s"${config.traderAtDestinationUrl.baseUrl}/movements/arrivals/$xMessageSender/messages/eis"
 
+    val header = headers.headers.filter(header => header._1 == "X-Message-Sender" || header._1 == "X-Message-Type" || header._1 == "Content-Type")
+
     // TODO: Determine which headers need to be sent on
     http.POSTString[HttpResponse](
       serviceUrl,
-      resquestData.toString,
-      headers.headers
+      requestData.toString,
+      header
     )
   }
 }

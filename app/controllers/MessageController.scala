@@ -17,7 +17,7 @@
 package controllers
 
 import config.AppConfig
-import connector.DestinationConnector
+import connectors.DestinationConnector
 import javax.inject.Inject
 import play.api.Logger
 import play.api.mvc.{Action, ControllerComponents}
