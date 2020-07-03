@@ -43,14 +43,14 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
   private val xMessageSender = "MDTP-1-1"
 
   "MessageController must" - {
-    "return Ok when X-Message-Sender is defined and there is an Ok from upstream" in {
+    "return Ok when X-Message-Recipient is defined and there is an Ok from upstream" in {
       when(mockConnector.sendMessage(any(), any(), any())(any()))
         .thenReturn(Future.successful(HttpResponse(OK)))
 
       val request =
         FakeRequest("POST", routes.MessageController.handleMessage().url)
           .withHeaders(
-            "X-Message-Sender" -> xMessageSender,
+            "X-Message-Recipient" -> xMessageSender,
             "Content-Type" -> "application/xml"
           )
           .withXmlBody(<xml>test</xml>)
@@ -60,6 +60,20 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
       status(result) mustBe OK
     }
 
+    "return BadRequest when X-Message-Recipient is not defined" in {
+      when(mockConnector.sendMessage(any(), any(), any())(any()))
+        .thenReturn(Future.successful(HttpResponse(OK)))
+
+      val request =
+        FakeRequest("POST", routes.MessageController.handleMessage().url)
+          .withHeaders("Content-Type" -> "application/xml")
+          .withXmlBody(<xml>test</xml>)
+
+      val result = route(application, request).value
+
+      status(result) mustBe BAD_REQUEST
+    }
+
     "return a Bad Request when upstream returns a Bad Request" in {
       when(mockConnector.sendMessage(any(), any(), any())(any()))
         .thenReturn(Future.successful(HttpResponse(BAD_REQUEST)))
@@ -67,7 +81,7 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
       val request =
         FakeRequest("POST", routes.MessageController.handleMessage().url)
           .withHeaders(
-            "X-Message-Sender" -> xMessageSender,
+            "X-Message-Recipient" -> xMessageSender,
             "Content-Type" -> "application/xml"
           )
           .withXmlBody(<xml>test</xml>)
@@ -84,7 +98,7 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
       val request =
         FakeRequest("POST", routes.MessageController.handleMessage().url)
           .withHeaders(
-            "X-Message-Sender" -> xMessageSender,
+            "X-Message-Recipient" -> xMessageSender,
             "Content-Type" -> "application/xml"
           )
           .withXmlBody(<xml>test</xml>)
@@ -101,7 +115,7 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
       val request =
         FakeRequest("POST", routes.MessageController.handleMessage().url)
           .withHeaders(
-            "X-Message-Sender" -> xMessageSender,
+            "X-Message-Recipient" -> xMessageSender,
             "Content-Type" -> "application/xml"
           )
           .withXmlBody(<xml>test</xml>)
@@ -118,7 +132,7 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
       val fakeRequest =
         FakeRequest("POST", routes.MessageController.handleMessage().url)
           .withHeaders(
-            "X-Message-Sender" -> xMessageSender,
+            "X-Message-Recipient" -> xMessageSender,
             "Content-Type" -> "application/xml"
           )
           .withXmlBody(<xml>test</xml>)

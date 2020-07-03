@@ -42,13 +42,12 @@ class DestinationConnector @Inject()(
     val serviceUrl =
       s"${config.traderAtDestinationUrl.baseUrl}/movements/arrivals/$xMessageSender/messages/eis"
 
-    val header = headers.headers.filter(header => header._1 == "X-Message-Sender" || header._1 == "X-Message-Type" || header._1 == "Content-Type")
+    val header = headers.headers.filter(
+      header =>
+        header._1 == "X-Message-Recipient" || header._1 == "X-Message-Type" || header._1 == "Content-Type"
+    )
 
     // TODO: Determine which headers need to be sent on
-    http.POSTString[HttpResponse](
-      serviceUrl,
-      requestData.toString,
-      header
-    )
+    http.POSTString[HttpResponse](serviceUrl, requestData.toString, header)
   }
 }
