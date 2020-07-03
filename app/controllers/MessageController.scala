@@ -37,13 +37,13 @@ class MessageController @Inject()(
 
   def handleMessage(): Action[NodeSeq] = Action.async(parse.xml) {
     implicit request =>
-      request.headers.get("X-Message-Sender") match {
+      request.headers.get("X-Message-Recipient") match {
         case Some(xMessageSender) =>
           connector
             .sendMessage(xMessageSender, request.body, request.headers)
             .map(response => Status(response.status))
         case None =>
-          logger.error("BadRequest: missing header key X-Message-Sender")
+          logger.error("BadRequest: missing header key X-Message-Recipient")
           Future.successful(BadRequest)
       }
   }
