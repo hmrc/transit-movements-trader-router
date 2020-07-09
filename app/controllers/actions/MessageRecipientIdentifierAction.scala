@@ -44,7 +44,7 @@ class MessageRecipientIdentifierAction(val executionContext: ExecutionContext)
   ): Future[Either[Result, MessageRecipientRequest[A]]] =
     Future.successful {
       request.headers
-        .get("X-Message-Recipient")
+        .get("x-message-recipient")
         .toRight {
           logger.error("BadRequest: missing header key X-Message-Recipient")
           BadRequest
