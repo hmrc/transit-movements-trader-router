@@ -44,7 +44,7 @@ class DestinationConnector @Inject()(
 
     val header = headers.headers.filter(
       header =>
-        header._1 == "X-Message-Recipient" || header._1 == "X-Message-Type" || header._1 == "Content-Type"
+        header._1.equalsIgnoreCase ("X-Message-Recipient") || header._1.equalsIgnoreCase("X-Message-Type") || header._1.equalsIgnoreCase("Content-Type")
     )
 
     // TODO: Determine which headers need to be sent on
