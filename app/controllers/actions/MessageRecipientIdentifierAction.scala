@@ -27,11 +27,9 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class MessageRecipientIdentifierActionProvider @Inject()(
   buildDefault: DefaultActionBuilder
-)(implicit val executionContext: ExecutionContext) {
+)(implicit val ec: ExecutionContext) {
   def apply(): ActionBuilder[MessageRecipientRequest, AnyContent] =
-    buildDefault andThen (new MessageRecipientIdentifierAction(
-      executionContext
-    ))
+    buildDefault andThen new MessageRecipientIdentifierAction(ec)
 }
 
 class MessageRecipientIdentifierAction(val executionContext: ExecutionContext)

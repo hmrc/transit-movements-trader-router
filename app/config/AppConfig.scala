@@ -27,6 +27,9 @@ class AppConfig @Inject()(config: Configuration,
   val traderAtDestinationUrl: Service =
     config.get[Service]("microservice.services.trader-at-destination")
 
+  val traderAtDepartureUrl: Service =
+    config.get[Service]("microservice.services.trader-at-departure")
+
   val auditingEnabled: Boolean = config.get[Boolean]("auditing.enabled")
 
   val graphiteHost: String =

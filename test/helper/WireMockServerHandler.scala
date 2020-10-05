@@ -21,19 +21,39 @@ import org.scalatest.BeforeAndAfterAll
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.Suite
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
+import play.api.Application
+import play.api.inject.Injector
+import play.api.inject.guice.{GuiceApplicationBuilder, GuiceableModule}
 
 trait WireMockServerHandler extends BeforeAndAfterAll with BeforeAndAfterEach {
   this: Suite =>
 
-  protected val server: WireMockServer = new WireMockServer(wireMockConfig.dynamicPort())
+  protected val server: WireMockServer = new WireMockServer(wireMockConfig().dynamicPort())
+
+  protected def portConfigKey: String
+
+  protected lazy val app: Application =
+    new GuiceApplicationBuilder()
+      .configure(
+        "metrics.jvm" -> false,
+        portConfigKey -> server.port().toString
+      )
+      .overrides(bindings: _*)
+      .build()
+
+  protected lazy val injector: Injector = app.injector
+
+  protected def bindings: Seq[GuiceableModule] = Seq.empty
 
   override def beforeAll(): Unit = {
     server.start()
+    app
     super.beforeAll()
   }
 
   override def beforeEach(): Unit = {
     server.resetAll()
+    app
     super.beforeEach()
   }
 
