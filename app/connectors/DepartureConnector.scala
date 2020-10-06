@@ -44,7 +44,6 @@ class DepartureConnector @Inject()(
         header._1.equalsIgnoreCase ("X-Message-Recipient") || header._1.equalsIgnoreCase("X-Message-Type") || header._1.equalsIgnoreCase("Content-Type")
     )
 
-    // TODO: Determine which headers need to be sent on
     http.POSTString[HttpResponse](serviceUrl, requestData.toString, header)
   }
 }

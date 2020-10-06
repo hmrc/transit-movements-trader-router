@@ -71,31 +71,5 @@ class RoutingServiceSpec extends SpecBase with BeforeAndAfterEach with ScalaChec
 
       }
     }
-
-    "return error message when no message type header" ignore {
-      val mockDepartureConnector = mock[DepartureConnector]
-      val mockDestinationConnector = mock[DestinationConnector]
-
-      when(mockDepartureConnector.sendMessage(any(), any(), any())(any())).thenReturn(Future.successful(HttpResponse(200)))
-
-      val sut = new RoutingService(mockDestinationConnector, mockDepartureConnector)
-
-//      val result = sut.sendMessage("MDTP-1-1", <Abc>123</Abc>, Headers())
-//
-//      result mustBe Left("No Message Type Found")
-    }
-
-    "return error message when message type is not recognised" ignore {
-      val mockDepartureConnector = mock[DepartureConnector]
-      val mockDestinationConnector = mock[DestinationConnector]
-
-      when(mockDepartureConnector.sendMessage(any(), any(), any())(any())).thenReturn(Future.successful(HttpResponse(200)))
-
-      val sut = new RoutingService(mockDestinationConnector, mockDepartureConnector)
-
-//      val result = sut.sendMessage("MDTP-1-1", <Abc>123</Abc>, Headers("X-Message-Type" -> "ABC123"))
-//
-//      result mustBe Left("Invalid Message Type Found")
-    }
   }
 }

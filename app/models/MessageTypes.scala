@@ -46,8 +46,6 @@ object MessageType extends Enumerable.Implicits {
   case object WriteOffNotification           extends IeMetadata("IE045", "CC045A") with MessageType
   case object GuaranteeNotValid              extends IeMetadata("IE055", "CC055A") with MessageType
 
-  //TODO: We need to add specific examples of failure cases to highlight and log.
-
   val departureValues: Seq[MessageType] = Seq(PositiveAcknowledgement, DepartureDeclaration, MrnAllocated, DeclarationRejected, ControlDecisionNotification, NoReleaseForTransit,
     ReleaseForTransit, DeclarationCancellationRequest, CancellationDecision, WriteOffNotification, GuaranteeNotValid)
 
