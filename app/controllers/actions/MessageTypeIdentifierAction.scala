@@ -40,7 +40,6 @@ class MessageTypeIdentifierAction(val ec: ExecutionContext)
   override protected def refine[A](
                                     request: MessageRecipientRequest[A]
                                   ): Future[Either[Result, RoutableRequest[A]]] = {
-    println("start")
       request.headers
         .get("X-Message-Type") match {
         case None => {
@@ -48,7 +47,7 @@ class MessageTypeIdentifierAction(val ec: ExecutionContext)
           Future.successful(Left(BadRequest("BadRequest: missing header key X-Message-Type")))
         }
         case Some(messageType) =>
-          MessageType.values.filter(x => x.code == messageType).headOption match {
+          MessageType.values.find(x => x.code == messageType) match {
             case None => {
               logger.debug("BadRequest: X-Message-Type header value is unsupported or invalid")
               Future.successful(Left(BadRequest("BadRequest: X-Message-Type header value is unsupported or invalid")))
