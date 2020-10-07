@@ -31,13 +31,13 @@ class DepartureConnector @Inject()(
                                  )(implicit ec: ExecutionContext) {
 
   def sendMessage(
-                   xMessageSender: String,
+                   xMessageRecipient: String,
                    requestData: NodeSeq,
                    headers: Headers
                  )(implicit hc: HeaderCarrier): Future[HttpResponse] = {
 
     val serviceUrl =
-      s"${config.traderAtDepartureUrl.baseUrl}/movements/departures/$xMessageSender/messages/eis"
+      s"${config.traderAtDepartureUrl.baseUrl}/movements/departures/$xMessageRecipient/messages/eis"
 
     val header = headers.headers.filter(
       header =>

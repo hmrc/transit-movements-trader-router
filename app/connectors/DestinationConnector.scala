@@ -34,13 +34,13 @@ class DestinationConnector @Inject()(
   val Log: Logger = Logger(getClass)
 
   def sendMessage(
-    xMessageSender: String,
-    requestData: NodeSeq,
-    headers: Headers
+                   xMessageRecipient: String,
+                   requestData: NodeSeq,
+                   headers: Headers
   )(implicit hc: HeaderCarrier): Future[HttpResponse] = {
 
     val serviceUrl =
-      s"${config.traderAtDestinationUrl.baseUrl}/movements/arrivals/$xMessageSender/messages/eis"
+      s"${config.traderAtDestinationUrl.baseUrl}/movements/arrivals/$xMessageRecipient/messages/eis"
 
     val header = headers.headers.filter(
       header =>
