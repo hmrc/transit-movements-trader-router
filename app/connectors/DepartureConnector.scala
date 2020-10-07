@@ -26,8 +26,8 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.xml.NodeSeq
 
 class DepartureConnector @Inject()(
-                                   val config: AppConfig,
-                                   val http: HttpClient
+                                   config: AppConfig,
+                                   http: HttpClient
                                  )(implicit ec: ExecutionContext) {
 
   def sendMessage(

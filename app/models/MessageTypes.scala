@@ -16,49 +16,41 @@
 
 package models
 
-import scala.xml.NodeSeq
-import cats.data.ReaderT
-
-
-sealed trait MessageType extends IeMetadata {
+trait MessageType extends IeMetadata {
   def code: String
   def rootNode: String
 }
 
+sealed trait Directable extends MessageType
+trait ArrivalMessage extends Directable
+trait DepartureMessage extends Directable
+
 object MessageType extends Enumerable.Implicits {
 
-  case object ArrivalNotification       extends IeMetadata("IE007", "CC007A") with MessageType
-  case object ArrivalRejection          extends IeMetadata("IE008", "CC008A") with MessageType
-  case object UnloadingPermission       extends IeMetadata("IE043", "CC043A") with MessageType
-  case object UnloadingRemarks          extends IeMetadata("IE044", "CC044A") with MessageType
-  case object UnloadingRemarksRejection extends IeMetadata("IE058", "CC058A") with MessageType
-  case object GoodsReleased             extends IeMetadata("IE025", "CC025A") with MessageType
+  case object ArrivalRejection          extends IeMetadata("IE008", "CC008A") with ArrivalMessage
+  case object UnloadingPermission       extends IeMetadata("IE043", "CC043A") with ArrivalMessage
+  case object UnloadingRemarksRejection extends IeMetadata("IE058", "CC058A") with ArrivalMessage
+  case object GoodsReleased             extends IeMetadata("IE025", "CC025A") with ArrivalMessage
 
-  case object PositiveAcknowledgement        extends IeMetadata("IE928", "CC928A") with MessageType
-  case object DepartureDeclaration           extends IeMetadata("IE015", "CC015B") with MessageType
-  case object MrnAllocated                   extends IeMetadata("IE028", "CC028A") with MessageType
-  case object DeclarationRejected            extends IeMetadata("IE016", "CC016A") with MessageType
-  case object ControlDecisionNotification    extends IeMetadata("IE060", "CC060A") with MessageType
-  case object NoReleaseForTransit            extends IeMetadata("IE051", "CC051A") with MessageType
-  case object ReleaseForTransit              extends IeMetadata("IE029", "CC029A") with MessageType
-  case object DeclarationCancellationRequest extends IeMetadata("IE014", "CC014A") with MessageType
-  case object CancellationDecision           extends IeMetadata("IE009", "CC009A") with MessageType
-  case object WriteOffNotification           extends IeMetadata("IE045", "CC045A") with MessageType
-  case object GuaranteeNotValid              extends IeMetadata("IE055", "CC055A") with MessageType
+  case object PositiveAcknowledgement        extends IeMetadata("IE928", "CC928A") with DepartureMessage
+  case object MrnAllocated                   extends IeMetadata("IE028", "CC028A") with DepartureMessage
+  case object DeclarationRejected            extends IeMetadata("IE016", "CC016A") with DepartureMessage
+  case object ControlDecisionNotification    extends IeMetadata("IE060", "CC060A") with DepartureMessage
+  case object NoReleaseForTransit            extends IeMetadata("IE051", "CC051A") with DepartureMessage
+  case object ReleaseForTransit              extends IeMetadata("IE029", "CC029A") with DepartureMessage
+  case object CancellationDecision           extends IeMetadata("IE009", "CC009A") with DepartureMessage
+  case object WriteOffNotification           extends IeMetadata("IE045", "CC045A") with DepartureMessage
+  case object GuaranteeNotValid              extends IeMetadata("IE055", "CC055A") with DepartureMessage
 
-  val departureValues: Seq[MessageType] = Seq(PositiveAcknowledgement, DepartureDeclaration, MrnAllocated, DeclarationRejected, ControlDecisionNotification, NoReleaseForTransit,
-    ReleaseForTransit, DeclarationCancellationRequest, CancellationDecision, WriteOffNotification, GuaranteeNotValid)
+  val departureValues: Seq[Directable] = Seq(PositiveAcknowledgement, MrnAllocated, DeclarationRejected, ControlDecisionNotification, NoReleaseForTransit,
+    ReleaseForTransit, CancellationDecision, WriteOffNotification, GuaranteeNotValid)
 
-  val arrivalValues: Seq[MessageType] = Seq(ArrivalNotification, ArrivalRejection, UnloadingPermission, UnloadingRemarks, UnloadingRemarksRejection, GoodsReleased)
+  val arrivalValues: Seq[Directable] = Seq(ArrivalRejection, UnloadingPermission, UnloadingRemarksRejection, GoodsReleased)
 
-  val values: Seq[MessageType] = departureValues ++ arrivalValues
+  val validMessages: Seq[Directable] = departureValues ++ arrivalValues
 
-  def getMessageType: ReaderT[Option, NodeSeq, MessageType] =
-    ReaderT[Option, NodeSeq, MessageType] {
-      nodeSeq =>
-        values.find(_.rootNode == nodeSeq.head.label)
-    }
+  val allMessages: Seq[MessageType] = departureValues ++ arrivalValues
 
   implicit val enumerable: Enumerable[MessageType] =
-    Enumerable(values.map(v => v.code -> v): _*)
+    Enumerable(allMessages.map(v => v.code -> v): _*)
 }

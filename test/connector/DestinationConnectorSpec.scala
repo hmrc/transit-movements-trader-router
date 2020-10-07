@@ -46,7 +46,7 @@ class DestinationConnectorSpec
   private val startUrl =
     "transit-movements-trader-at-destination/movements/arrivals"
   val sampleXml: Elem = <xml>test</xml>
-  val xMessageSender = "MDTP-1-1"
+  val xMessageRecipient = "MDTP-1-1"
 
   implicit val hc: HeaderCarrier =
     HeaderCarrier().withExtraHeaders("X-Test-Header" -> "X-Test-Header-Value")
@@ -58,14 +58,14 @@ class DestinationConnectorSpec
     "must return status as OK for valid input request" in {
 
       server.stubFor(
-        post(urlEqualTo(s"/$startUrl/$xMessageSender/messages/eis"))
+        post(urlEqualTo(s"/$startUrl/$xMessageRecipient/messages/eis"))
           .willReturn(
             aResponse()
               .withStatus(OK)
           )
       )
 
-      val result = connector.sendMessage(xMessageSender, sampleXml, Headers())
+      val result = connector.sendMessage(xMessageRecipient, sampleXml, Headers())
       result.futureValue.status mustBe OK
     }
 
@@ -75,14 +75,14 @@ class DestinationConnectorSpec
 
       forAll(errorResponses) { errorResponse =>
         server.stubFor(
-          post(urlEqualTo(s"/$startUrl/$xMessageSender/messages/eis"))
+          post(urlEqualTo(s"/$startUrl/$xMessageRecipient/messages/eis"))
             .willReturn(
               aResponse()
                 .withStatus(errorResponse)
             )
         )
 
-        val result = connector.sendMessage(xMessageSender, sampleXml, Headers())
+        val result = connector.sendMessage(xMessageRecipient, sampleXml, Headers())
 
         result.futureValue.status mustBe errorResponse
 

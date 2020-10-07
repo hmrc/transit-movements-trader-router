@@ -18,7 +18,7 @@ package services
 
 import base.SpecBase
 import connectors.{DepartureConnector, DestinationConnector}
-import models.MessageType
+import models.{Directable, MessageType}
 import org.scalatest.BeforeAndAfterEach
 import org.mockito.Matchers.any
 import org.mockito.Mockito._
@@ -31,9 +31,9 @@ import scala.concurrent.Future
 
 class RoutingServiceSpec extends SpecBase with BeforeAndAfterEach with ScalaCheckPropertyChecks{
 
-  val destinationMessageTypes = Gen.oneOf[MessageType](MessageType.arrivalValues)
+  val destinationMessageTypes = Gen.oneOf[Directable](MessageType.arrivalValues)
 
-  val departureMessageTypes = Gen.oneOf[MessageType](MessageType.departureValues)
+  val departureMessageTypes = Gen.oneOf[Directable](MessageType.departureValues)
 
   "sendMessage must" - {
     "use DepartureConnector when forwarding a Departure Message" in {

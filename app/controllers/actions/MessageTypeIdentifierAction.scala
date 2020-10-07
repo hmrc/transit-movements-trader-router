@@ -47,9 +47,9 @@ class MessageTypeIdentifierAction(val ec: ExecutionContext)
           Future.successful(Left(BadRequest("BadRequest: missing header key X-Message-Type")))
         }
         case Some(messageType) =>
-          MessageType.values.find(x => x.code == messageType) match {
+          MessageType.validMessages.find(x => x.code == messageType) match {
             case None => {
-              logger.debug("BadRequest: X-Message-Type header value is unsupported or invalid")
+              logger.warn("BadRequest: X-Message-Type header value is unsupported or invalid")
               Future.successful(Left(BadRequest("BadRequest: X-Message-Type header value is unsupported or invalid")))
             }
             case Some(mt) => Future.successful(Right(RoutableRequest(request, mt)))

@@ -26,119 +26,91 @@ class MessageTypeSpec extends SpecBase with ScalaCheckDrivenPropertyChecks {
 
   "MessageType must contain" - {
     "PositiveAcknowledgement" in {
-      MessageType.values must contain(PositiveAcknowledgement)
+      MessageType.allMessages must contain(PositiveAcknowledgement)
       PositiveAcknowledgement.code mustEqual "IE928"
       PositiveAcknowledgement.rootNode mustEqual "CC928A"
       MessageType.departureValues must contain(PositiveAcknowledgement)
     }
 
-    "DepartureDeclaration" in {
-      MessageType.values must contain(DepartureDeclaration)
-      DepartureDeclaration.code mustEqual "IE015"
-      DepartureDeclaration.rootNode mustEqual "CC015B"
-      MessageType.departureValues must contain(DepartureDeclaration)
-    }
-
     "MrnAllocated" in {
-      MessageType.values must contain(MrnAllocated)
+      MessageType.allMessages must contain(MrnAllocated)
       MrnAllocated.code mustEqual "IE028"
       MrnAllocated.rootNode mustEqual "CC028A"
       MessageType.departureValues must contain(MrnAllocated)
     }
 
     "DeclarationRejected" in {
-      MessageType.values must contain(DeclarationRejected)
+      MessageType.allMessages must contain(DeclarationRejected)
       DeclarationRejected.code mustEqual "IE016"
       DeclarationRejected.rootNode mustEqual "CC016A"
       MessageType.departureValues must contain(DeclarationRejected)
     }
 
     "ControlDecisionNotification" in {
-      MessageType.values must contain(ControlDecisionNotification)
+      MessageType.allMessages must contain(ControlDecisionNotification)
       ControlDecisionNotification.code mustEqual "IE060"
       ControlDecisionNotification.rootNode mustEqual "CC060A"
       MessageType.departureValues must contain(ControlDecisionNotification)
     }
 
     "NoReleaseForTransit" in {
-      MessageType.values must contain(NoReleaseForTransit)
+      MessageType.allMessages must contain(NoReleaseForTransit)
       NoReleaseForTransit.code mustEqual "IE051"
       NoReleaseForTransit.rootNode mustEqual "CC051A"
       MessageType.departureValues must contain(NoReleaseForTransit)
     }
 
     "ReleaseForTransit" in {
-      MessageType.values must contain(ReleaseForTransit)
+      MessageType.allMessages must contain(ReleaseForTransit)
       ReleaseForTransit.code mustEqual "IE029"
       ReleaseForTransit.rootNode mustEqual "CC029A"
       MessageType.departureValues must contain(ReleaseForTransit)
     }
 
-    "DeclarationCancellationRequest" in {
-      MessageType.values must contain(DeclarationCancellationRequest)
-      DeclarationCancellationRequest.code mustEqual "IE014"
-      DeclarationCancellationRequest.rootNode mustEqual "CC014A"
-      MessageType.departureValues must contain(DeclarationCancellationRequest)
-    }
-
     "CancellationDecision" in {
-      MessageType.values must contain(CancellationDecision)
+      MessageType.allMessages must contain(CancellationDecision)
       CancellationDecision.code mustEqual "IE009"
       CancellationDecision.rootNode mustEqual "CC009A"
       MessageType.departureValues must contain(CancellationDecision)
     }
 
     "WriteOffNotification" in {
-      MessageType.values must contain(WriteOffNotification)
+      MessageType.allMessages must contain(WriteOffNotification)
       WriteOffNotification.code mustEqual "IE045"
       WriteOffNotification.rootNode mustEqual "CC045A"
       MessageType.departureValues must contain(WriteOffNotification)
     }
 
     "GuaranteeNotValid" in {
-      MessageType.values must contain(GuaranteeNotValid)
+      MessageType.allMessages must contain(GuaranteeNotValid)
       GuaranteeNotValid.code mustEqual "IE055"
       GuaranteeNotValid.rootNode mustEqual "CC055A"
       MessageType.departureValues must contain(GuaranteeNotValid)
     }
 
-    "ArrivalNotification" in {
-      MessageType.values must contain(ArrivalNotification)
-      ArrivalNotification.code mustEqual "IE007"
-      ArrivalNotification.rootNode mustEqual "CC007A"
-      MessageType.arrivalValues must contain(ArrivalNotification)
-    }
-
     "ArrivalRejection" in {
-      MessageType.values must contain(ArrivalRejection)
+      MessageType.allMessages must contain(ArrivalRejection)
       ArrivalRejection.code mustEqual "IE008"
       ArrivalRejection.rootNode mustEqual "CC008A"
       MessageType.arrivalValues must contain(ArrivalRejection)
     }
 
     "UnloadingPermission" in {
-      MessageType.values must contain(UnloadingPermission)
+      MessageType.allMessages must contain(UnloadingPermission)
       UnloadingPermission.code mustEqual "IE043"
       UnloadingPermission.rootNode mustEqual "CC043A"
       MessageType.arrivalValues must contain(UnloadingPermission)
     }
 
-    "UnloadingRemarks" in {
-      MessageType.values must contain(UnloadingRemarks)
-      UnloadingRemarks.code mustEqual "IE044"
-      UnloadingRemarks.rootNode mustEqual "CC044A"
-      MessageType.arrivalValues must contain(UnloadingRemarks)
-    }
-
     "UnloadingRemarksRejection" in {
-      MessageType.values must contain(UnloadingRemarksRejection)
+      MessageType.allMessages must contain(UnloadingRemarksRejection)
       UnloadingRemarksRejection.code mustEqual "IE058"
       UnloadingRemarksRejection.rootNode mustEqual "CC058A"
       MessageType.arrivalValues must contain(UnloadingRemarksRejection)
     }
 
     "GoodsReleased" in {
-      MessageType.values must contain(GoodsReleased)
+      MessageType.allMessages must contain(GoodsReleased)
       GoodsReleased.code mustEqual "IE025"
       GoodsReleased.rootNode mustEqual "CC025A"
       MessageType.arrivalValues must contain(GoodsReleased)
@@ -147,7 +119,7 @@ class MessageTypeSpec extends SpecBase with ScalaCheckDrivenPropertyChecks {
 
   "Json reads and writes" - {
     "writes" in {
-      forAll(Gen.oneOf[MessageType](MessageType.values)) {
+      forAll(Gen.oneOf[MessageType](MessageType.allMessages)) {
         messageType =>
           Json.toJson(messageType) mustEqual JsString(messageType.code)
       }
@@ -155,7 +127,7 @@ class MessageTypeSpec extends SpecBase with ScalaCheckDrivenPropertyChecks {
 
     "reads" - {
       "returns the message type when given the code for a message" in {
-        forAll(Gen.oneOf[MessageType](MessageType.values)) {
+        forAll(Gen.oneOf[MessageType](MessageType.allMessages)) {
           message =>
             JsString(message.code).validate[MessageType] mustEqual JsSuccess(message)
         }

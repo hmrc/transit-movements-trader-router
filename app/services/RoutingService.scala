@@ -18,20 +18,21 @@ package services
 
 import connectors.{DepartureConnector, DestinationConnector}
 import javax.inject.Inject
-import models.MessageType
+import models.{Directable, MessageType}
 import play.api.mvc.Headers
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-
 import scala.concurrent.Future
 import scala.xml.NodeSeq
+import models.ArrivalMessage
+import models.DepartureMessage
 
 class RoutingService @Inject()(destinationConnector: DestinationConnector, departureConnector: DepartureConnector) {
 
-    def sendMessage(messageRecipient: String, messageType: MessageType, messageBody: NodeSeq, headers: Headers)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
-            messageType match {
-                case m if MessageType.arrivalValues.contains(m) =>
+    def sendMessage(messageRecipient: String, directable: Directable, messageBody: NodeSeq, headers: Headers)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+            directable match {
+                case _:ArrivalMessage =>
                     destinationConnector.sendMessage(messageRecipient, messageBody, headers)
-                case m if MessageType.departureValues.contains(m) =>
+                case _:DepartureMessage =>
                     departureConnector.sendMessage(messageRecipient, messageBody, headers)
             }
         }

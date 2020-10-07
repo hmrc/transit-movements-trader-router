@@ -37,7 +37,7 @@ class MessageController @Inject()(
   def handleMessage(): Action[NodeSeq] =
     (messageRecipientIdentifier() andThen messageTypeIdentifier()).async(parse.xml) { implicit request =>
       routingService
-        .sendMessage(request.messageRecipient, request.messageType, request.body, request.headers)
+        .sendMessage(request.messageRecipient, request.directable, request.body, request.headers)
         .map(response => Status(response.status))
     }
 }
