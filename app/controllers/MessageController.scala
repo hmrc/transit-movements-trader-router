@@ -17,9 +17,10 @@
 package controllers
 
 import connectors.DestinationConnector
-import controllers.actions.MessageRecipientIdentifierActionProvider
+import controllers.actions.{MessageRecipientIdentifierActionProvider, MessageTypeIdentifierAction, MessageTypeIdentifierActionProvider}
 import javax.inject.Inject
 import play.api.mvc.{Action, ControllerComponents}
+import services.RoutingService
 import uk.gov.hmrc.play.bootstrap.controller.BackendController
 
 import scala.concurrent.ExecutionContext
@@ -27,15 +28,16 @@ import scala.xml.NodeSeq
 
 class MessageController @Inject()(
   messageRecipientIdentifier: MessageRecipientIdentifierActionProvider,
+  messageTypeIdentifier: MessageTypeIdentifierActionProvider,
   cc: ControllerComponents,
-  connector: DestinationConnector
+  routingService: RoutingService
 )(implicit val ec: ExecutionContext)
     extends BackendController(cc) {
 
   def handleMessage(): Action[NodeSeq] =
-    messageRecipientIdentifier().async(parse.xml) { implicit request =>
-      connector
-        .sendMessage(request.messageRecipient, request.body, request.headers)
+    (messageRecipientIdentifier() andThen messageTypeIdentifier()).async(parse.xml) { implicit request =>
+      routingService
+        .sendMessage(request.messageRecipient, request.directable, request.body, request.headers)
         .map(response => Status(response.status))
     }
 }

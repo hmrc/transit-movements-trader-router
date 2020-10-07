@@ -18,7 +18,6 @@ package connectors
 
 import config.AppConfig
 import javax.inject.Inject
-import play.api.Logger
 import play.api.mvc.Headers
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
@@ -26,28 +25,25 @@ import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import scala.concurrent.{ExecutionContext, Future}
 import scala.xml.NodeSeq
 
-class DestinationConnector @Inject()(
-  val config: AppConfig,
-  val http: HttpClient
-)(implicit ec: ExecutionContext) {
-
-  val Log: Logger = Logger(getClass)
+class DepartureConnector @Inject()(
+                                   config: AppConfig,
+                                   http: HttpClient
+                                 )(implicit ec: ExecutionContext) {
 
   def sendMessage(
                    xMessageRecipient: String,
                    requestData: NodeSeq,
                    headers: Headers
-  )(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+                 )(implicit hc: HeaderCarrier): Future[HttpResponse] = {
 
     val serviceUrl =
-      s"${config.traderAtDestinationUrl.baseUrl}/movements/arrivals/$xMessageRecipient/messages/eis"
+      s"${config.traderAtDepartureUrl.baseUrl}/movements/departures/$xMessageRecipient/messages/eis"
 
     val header = headers.headers.filter(
       header =>
         header._1.equalsIgnoreCase ("X-Message-Recipient") || header._1.equalsIgnoreCase("X-Message-Type") || header._1.equalsIgnoreCase("Content-Type")
     )
 
-    // TODO: Determine which headers need to be sent on
     http.POSTString[HttpResponse](serviceUrl, requestData.toString, header)
   }
 }
