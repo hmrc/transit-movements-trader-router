@@ -26,7 +26,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 class MessageTypeIdentifierActionSpec extends SpecBase with ScalaFutures with EitherValues {
 
@@ -67,5 +67,20 @@ class MessageTypeIdentifierActionSpec extends SpecBase with ScalaFutures with Ei
       }
     }
 
+    "will respond with BadRequest when the X-Message-Type is not supported" in {
+      def fakeRequest = MessageRecipientRequest(FakeRequest("","").withHeaders(
+        "X-Message-Type" -> "IE917"
+      ), "abc")
+
+      val action: Harness = new Harness()
+
+      val result = action.run(fakeRequest)
+
+      whenReady(result) {
+        r =>
+          r.isLeft mustBe true
+          status(Future.successful(r.left.value)) mustEqual BAD_REQUEST
+      }
+    }
   }
 }
