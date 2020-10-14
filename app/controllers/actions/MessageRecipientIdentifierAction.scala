@@ -19,9 +19,9 @@ package controllers.actions
 import com.google.inject.Inject
 import models.requests
 import models.requests.MessageRecipientRequest
-import play.api.{Logger, mvc}
-import play.api.mvc._
+import play.api.Logger
 import play.api.mvc.Results.BadRequest
+import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -41,6 +41,7 @@ class MessageRecipientIdentifierAction(val executionContext: ExecutionContext)
     request: Request[A]
   ): Future[Either[Result, MessageRecipientRequest[A]]] =
     Future.successful {
+      logger.debug(s"Received message:\n${request.body}")
       request.headers
         .get("X-Message-Recipient")
         .toRight {

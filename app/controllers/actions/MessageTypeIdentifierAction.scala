@@ -16,18 +16,18 @@
 
 package controllers.actions
 
-import com.google.inject.{ImplementedBy, Inject}
+import com.google.inject.Inject
 import models.MessageType
 import models.requests.{MessageRecipientRequest, RoutableRequest}
 import play.api.Logger
-import play.api.mvc.{ActionBuilder, ActionRefiner, ActionTransformer, AnyContent, DefaultActionBuilder, Request, Result}
 import play.api.mvc.Results.BadRequest
+import play.api.mvc.{ActionRefiner, DefaultActionBuilder, Result}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class MessageTypeIdentifierActionProvider @Inject()(
-     buildDefault: DefaultActionBuilder
-   )(implicit ec: ExecutionContext){
+                                                     buildDefault: DefaultActionBuilder
+                                                   )(implicit ec: ExecutionContext) {
   def apply(): ActionRefiner[MessageRecipientRequest, RoutableRequest] =
     new MessageTypeIdentifierAction(ec)
 }
@@ -40,22 +40,22 @@ class MessageTypeIdentifierAction(val ec: ExecutionContext)
   override protected def refine[A](
                                     request: MessageRecipientRequest[A]
                                   ): Future[Either[Result, RoutableRequest[A]]] = {
-      request.headers
-        .get("X-Message-Type") match {
-        case None => {
-          logger.debug("BadRequest: missing header key X-Message-Type")
-          Future.successful(Left(BadRequest("BadRequest: missing header key X-Message-Type")))
-        }
-        case Some(messageType) =>
-          MessageType.validMessages.find(x => x.code == messageType) match {
-            case None => {
-              logger.warn("BadRequest: X-Message-Type header value is unsupported or invalid")
-              Future.successful(Left(BadRequest("BadRequest: X-Message-Type header value is unsupported or invalid")))
-            }
-            case Some(mt) => Future.successful(Right(RoutableRequest(request, mt)))
-          }
-
+    request.headers
+      .get("X-Message-Type") match {
+      case None => {
+        logger.debug("BadRequest: missing header key X-Message-Type")
+        Future.successful(Left(BadRequest("BadRequest: missing header key X-Message-Type")))
       }
+      case Some(messageType) =>
+        MessageType.validMessages.find(x => x.code == messageType) match {
+          case None => {
+            logger.warn(s"BadRequest: X-Message-Type header ${messageType} is unsupported or invalid")
+            Future.successful(Left(BadRequest(s"BadRequest: X-Message-Type header ${messageType} is unsupported or invalid")))
+          }
+          case Some(mt) => Future.successful(Right(RoutableRequest(request, mt)))
+        }
+
+    }
   }
 
   override protected def executionContext: ExecutionContext = ec
