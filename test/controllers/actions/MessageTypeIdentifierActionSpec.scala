@@ -67,7 +67,7 @@ class MessageTypeIdentifierActionSpec extends SpecBase with ScalaFutures with Ei
       }
     }
 
-    "will respond with BadRequest when the X-Message-Type is not supported" in {
+    "will respond with NotImplemented when the X-Message-Type is not supported" in {
       def fakeRequest = MessageRecipientRequest(FakeRequest("","").withHeaders(
         "X-Message-Type" -> "IE917"
       ), "abc")
@@ -79,7 +79,7 @@ class MessageTypeIdentifierActionSpec extends SpecBase with ScalaFutures with Ei
       whenReady(result) {
         r =>
           r.isLeft mustBe true
-          status(Future.successful(r.left.value)) mustEqual BAD_REQUEST
+          status(Future.successful(r.left.value)) mustEqual NOT_IMPLEMENTED
       }
     }
   }

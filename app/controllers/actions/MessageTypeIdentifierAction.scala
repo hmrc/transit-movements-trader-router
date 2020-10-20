@@ -21,6 +21,7 @@ import models.MessageType
 import models.requests.{MessageRecipientRequest, RoutableRequest}
 import play.api.Logger
 import play.api.mvc.Results.BadRequest
+import play.api.mvc.Results.NotImplemented
 import play.api.mvc.{ActionRefiner, DefaultActionBuilder, Result}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -49,8 +50,8 @@ class MessageTypeIdentifierAction(val ec: ExecutionContext)
       case Some(messageType) =>
         MessageType.validMessages.find(x => x.code == messageType) match {
           case None => {
-            logger.warn(s"BadRequest: X-Message-Type header ${messageType} is unsupported or invalid")
-            Future.successful(Left(BadRequest(s"BadRequest: X-Message-Type header ${messageType} is unsupported or invalid")))
+            logger.warn(s"NotImplemented: X-Message-Type header ${messageType} is unsupported or invalid")
+            Future.successful(Left(NotImplemented(s"NotImplemented: X-Message-Type header ${messageType} is unsupported or invalid")))
           }
           case Some(mt) => Future.successful(Right(RoutableRequest(request, mt)))
         }
