@@ -56,7 +56,7 @@ class MessageTypeSpec extends SpecBase with ScalaCheckDrivenPropertyChecks {
     "NoReleaseForTransit" in {
       MessageType.allMessages must contain(NoReleaseForTransit)
       NoReleaseForTransit.code mustEqual "IE051"
-      NoReleaseForTransit.rootNode mustEqual "CC051A"
+      NoReleaseForTransit.rootNode mustEqual "CC051B"
       MessageType.departureValues must contain(NoReleaseForTransit)
     }
 
