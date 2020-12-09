@@ -18,10 +18,8 @@ package connectors
 
 import config.AppConfig
 import javax.inject.Inject
-import play.api.Logger
 import play.api.mvc.Headers
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.play.bootstrap.http.HttpClient
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.xml.NodeSeq
@@ -30,8 +28,6 @@ class DestinationConnector @Inject()(
   val config: AppConfig,
   val http: HttpClient
 )(implicit ec: ExecutionContext) {
-
-  val Log: Logger = Logger(getClass)
 
   def sendMessage(
                    xMessageRecipient: String,

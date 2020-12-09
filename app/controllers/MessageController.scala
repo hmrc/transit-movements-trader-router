@@ -16,12 +16,11 @@
 
 package controllers
 
-import connectors.DestinationConnector
-import controllers.actions.{MessageRecipientIdentifierActionProvider, MessageTypeIdentifierAction, MessageTypeIdentifierActionProvider}
+import controllers.actions.{MessageRecipientIdentifierActionProvider, MessageTypeIdentifierActionProvider}
 import javax.inject.Inject
 import play.api.mvc.{Action, ControllerComponents}
 import services.RoutingService
-import uk.gov.hmrc.play.bootstrap.controller.BackendController
+import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import scala.concurrent.ExecutionContext
 import scala.xml.NodeSeq
