@@ -17,9 +17,9 @@
 package controllers.actions
 
 import com.google.inject.Inject
+import logging.Logging
 import models.requests
 import models.requests.MessageRecipientRequest
-import play.api.Logger
 import play.api.mvc.Results.BadRequest
 import play.api.mvc._
 
@@ -33,15 +33,13 @@ class MessageRecipientIdentifierActionProvider @Inject()(
 }
 
 class MessageRecipientIdentifierAction(val executionContext: ExecutionContext)
-    extends ActionRefiner[Request, MessageRecipientRequest] {
-
-  private lazy val logger = Logger(getClass)
+  extends ActionRefiner[Request, MessageRecipientRequest]
+    with Logging {
 
   override protected def refine[A](
     request: Request[A]
   ): Future[Either[Result, MessageRecipientRequest[A]]] =
     Future.successful {
-      logger.debug(s"Received message:\n${request.body}")
       request.headers
         .get("X-Message-Recipient")
         .toRight {

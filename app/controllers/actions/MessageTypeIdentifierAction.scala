@@ -17,36 +17,33 @@
 package controllers.actions
 
 import com.google.inject.Inject
+import logging.Logging
 import models.MessageType
 import models.requests.{MessageRecipientRequest, RoutableRequest}
-import play.api.Logger
 import play.api.mvc.Results.BadRequest
 import play.api.mvc.Results.NotImplemented
-import play.api.mvc.{ActionRefiner, DefaultActionBuilder, Result}
+import play.api.mvc.{ActionRefiner, Result}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class MessageTypeIdentifierActionProvider @Inject()(
-                                                     buildDefault: DefaultActionBuilder
-                                                   )(implicit ec: ExecutionContext) {
+class MessageTypeIdentifierActionProvider @Inject()(implicit ec: ExecutionContext) {
   def apply(): ActionRefiner[MessageRecipientRequest, RoutableRequest] =
     new MessageTypeIdentifierAction(ec)
 }
 
 class MessageTypeIdentifierAction(val ec: ExecutionContext)
-  extends ActionRefiner[MessageRecipientRequest, RoutableRequest] {
-
-  private lazy val logger = Logger(getClass)
+  extends ActionRefiner[MessageRecipientRequest, RoutableRequest]
+    with Logging {
 
   override protected def refine[A](
                                     request: MessageRecipientRequest[A]
                                   ): Future[Either[Result, RoutableRequest[A]]] = {
     request.headers
       .get("X-Message-Type") match {
-      case None => {
-        logger.debug("BadRequest: missing header key X-Message-Type")
+      case None =>
+        logger.warn("BadRequest: missing header key X-Message-Type")
         Future.successful(Left(BadRequest("BadRequest: missing header key X-Message-Type")))
-      }
+
       case Some(messageType) =>
         MessageType.validMessages.find(x => x.code == messageType) match {
           case None => {
