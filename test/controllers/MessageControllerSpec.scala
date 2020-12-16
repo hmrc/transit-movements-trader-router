@@ -63,7 +63,7 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
       val result = route(application, request).value
 
       status(result) mustBe OK
-      header(LOCATION, result) mustEqual Some("/movements/arrivals/1/messages/1")
+      header(LOCATION, result) mustBe Some("/movements/arrivals/1/messages/1")
     }
 
     "return BadRequest when X-Message-Recipient is not defined" in {
