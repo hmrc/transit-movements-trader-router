@@ -45,9 +45,11 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
   private val xMessageType = "IE008"
 
   "MessageController must" - {
-    "return Ok when X-Message-Recipient and X-Message-Type are defined and there is an Ok from upstream" in {
+    "return Ok when X-Message-Recipient and X-Message-Type are defined and there is an Ok with Location header from upstream" in {
       when(mockRoutingService.sendMessage(any(), any(), any(), any())(any()))
-        .thenReturn(Future.successful(HttpResponse(OK)))
+        .thenReturn(Future.successful(
+          HttpResponse(OK,
+            responseHeaders = Map(LOCATION -> Seq("/movements/arrivals/1/messages/1")))))
 
       val request =
         FakeRequest("POST", routes.MessageController.handleMessage().url)
@@ -61,6 +63,7 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
       val result = route(application, request).value
 
       status(result) mustBe OK
+      header(LOCATION, result) mustEqual Some("/movements/arrivals/1/messages/1")
     }
 
     "return BadRequest when X-Message-Recipient is not defined" in {
@@ -161,6 +164,24 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
           .withXmlBody(<xml>test</xml>)
 
       val result = route(application, fakeRequest).value
+
+      status(result) mustBe INTERNAL_SERVER_ERROR
+    }
+
+    "return Internal Server Error when there is an Ok with no Location header from upstream" in {
+      when(mockRoutingService.sendMessage(any(), any(), any(), any())(any()))
+        .thenReturn(Future.successful(HttpResponse(OK)))
+
+      val request =
+        FakeRequest("POST", routes.MessageController.handleMessage().url)
+          .withHeaders(
+            "X-Message-Recipient" -> xMessageRecipient,
+            "X-Message-Type" -> xMessageType,
+            "Content-Type" -> "application/xml"
+          )
+          .withXmlBody(<xml>test</xml>)
+
+      val result = route(application, request).value
 
       status(result) mustBe INTERNAL_SERVER_ERROR
     }

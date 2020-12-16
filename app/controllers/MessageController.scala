@@ -18,9 +18,11 @@ package controllers
 
 import connectors.DestinationConnector
 import controllers.actions.{MessageRecipientIdentifierActionProvider, MessageTypeIdentifierAction, MessageTypeIdentifierActionProvider}
+
 import javax.inject.Inject
 import play.api.mvc.{Action, ControllerComponents}
 import services.RoutingService
+import uk.gov.hmrc.http.RawReads.is2xx
 import uk.gov.hmrc.play.bootstrap.controller.BackendController
 
 import scala.concurrent.ExecutionContext
@@ -38,6 +40,19 @@ class MessageController @Inject()(
     (messageRecipientIdentifier() andThen messageTypeIdentifier()).async(parse.xml) { implicit request =>
       routingService
         .sendMessage(request.messageRecipient, request.directable, request.body, request.headers)
-        .map(response => Status(response.status))
+        .map {
+          response =>
+            response.status match {
+              case status if is2xx(status) =>
+                response.header(LOCATION) match {
+                  case Some(value) =>
+                    Status(response.status).withHeaders(LOCATION -> value)
+                  case None =>
+                    InternalServerError
+                }
+              case _ =>
+                Status(response.status)
+            }
+        }
     }
 }
