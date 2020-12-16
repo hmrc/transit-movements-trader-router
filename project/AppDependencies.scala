@@ -8,7 +8,7 @@ object AppDependencies {
 
   val compile = Seq(
 
-    "uk.gov.hmrc"             %% "bootstrap-play-26"        % "1.4.0",
+    "uk.gov.hmrc"             %% "bootstrap-backend-play-27"        % "3.2.0",
   )
 
   val test = Seq(
@@ -19,7 +19,6 @@ object AppDependencies {
     "org.scalatestplus.play"  %% "scalatestplus-play"       % "3.1.2"                 % "test, it",
     "org.mockito"             %  "mockito-all"               % "1.10.19" % "test, it",
     "org.scalacheck"          %% "scalacheck"               % "1.14.0" % "test, it",
-    "com.github.tomakehurst"  %  "wiremock-standalone"       % "2.25.0" % "test, it",
+    "com.github.tomakehurst"  %  "wiremock-standalone"       % "2.25.0" % "test, it"
   )
-
 }
