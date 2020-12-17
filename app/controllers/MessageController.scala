@@ -47,7 +47,7 @@ class MessageController @Inject()(
                   case Some(value) =>
                     Status(response.status).withHeaders(LOCATION -> value)
                   case None =>
-                    InternalServerError
+                    Status(response.status)
                 }
               case _ =>
                 Status(response.status)

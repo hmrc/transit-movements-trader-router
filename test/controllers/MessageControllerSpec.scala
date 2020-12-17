@@ -65,6 +65,26 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
       header(LOCATION, result) mustBe Some("/movements/arrivals/1/messages/1")
     }
 
+    "return Ok when X-Message-Recipient and X-Message-Type are defined and there is an Ok with no Location header from downstream response" in {
+      when(mockRoutingService.sendMessage(any(), any(), any(), any())(any()))
+        .thenReturn(Future.successful(
+          HttpResponse(OK, "")))
+
+      val request =
+        FakeRequest("POST", routes.MessageController.handleMessage().url)
+          .withHeaders(
+            "X-Message-Recipient" -> xMessageRecipient,
+            "X-Message-Type" -> xMessageType,
+            "Content-Type" -> "application/xml"
+          )
+          .withXmlBody(<xml>test</xml>)
+
+      val result = route(application, request).value
+
+      status(result) mustBe OK
+      header(LOCATION, result) mustBe None
+    }
+
     "return BadRequest when X-Message-Recipient is not defined" in {
       when(mockRoutingService.sendMessage(any(), any(), any(), any())(any()))
         .thenReturn(Future.successful(HttpResponse(OK, "")))
@@ -163,24 +183,6 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
           .withXmlBody(<xml>test</xml>)
 
       val result = route(application, fakeRequest).value
-
-      status(result) mustBe INTERNAL_SERVER_ERROR
-    }
-
-    "return Internal Server Error when there is an Ok with no Location header from downstream response" in {
-      when(mockRoutingService.sendMessage(any(), any(), any(), any())(any()))
-        .thenReturn(Future.successful(HttpResponse(OK, "")))
-
-      val request =
-        FakeRequest("POST", routes.MessageController.handleMessage().url)
-          .withHeaders(
-            "X-Message-Recipient" -> xMessageRecipient,
-            "X-Message-Type" -> xMessageType,
-            "Content-Type" -> "application/xml"
-          )
-          .withXmlBody(<xml>test</xml>)
-
-      val result = route(application, request).value
 
       status(result) mustBe INTERNAL_SERVER_ERROR
     }
