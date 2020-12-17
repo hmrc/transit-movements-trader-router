@@ -17,6 +17,7 @@
 package controllers
 
 import controllers.actions.{MessageRecipientIdentifierActionProvider, MessageTypeIdentifierActionProvider}
+import play.api.Logger
 
 import javax.inject.Inject
 import play.api.mvc.{Action, ControllerComponents}
@@ -47,6 +48,7 @@ class MessageController @Inject()(
                   case Some(value) =>
                     Status(response.status).withHeaders(LOCATION -> value)
                   case None =>
+                    Logger.warn("No location header in downstream response")
                     Status(response.status)
                 }
               case _ =>
