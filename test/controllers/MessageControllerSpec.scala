@@ -45,9 +45,10 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
   private val xMessageType = "IE008"
 
   "MessageController must" - {
-    "return Ok when X-Message-Recipient and X-Message-Type are defined and there is an Ok from upstream" in {
+    "return Ok when X-Message-Recipient and X-Message-Type are defined and there is an Ok with Location header from downstream response" in {
       when(mockRoutingService.sendMessage(any(), any(), any(), any())(any()))
-        .thenReturn(Future.successful(HttpResponse(OK)))
+        .thenReturn(Future.successful(
+          HttpResponse(OK, "", Map(LOCATION -> Seq("/movements/arrivals/1/messages/1")))))
 
       val request =
         FakeRequest("POST", routes.MessageController.handleMessage().url)
@@ -61,11 +62,32 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
       val result = route(application, request).value
 
       status(result) mustBe OK
+      header(LOCATION, result) mustBe Some("/movements/arrivals/1/messages/1")
+    }
+
+    "return Ok when X-Message-Recipient and X-Message-Type are defined and there is an Ok with no Location header from downstream response" in {
+      when(mockRoutingService.sendMessage(any(), any(), any(), any())(any()))
+        .thenReturn(Future.successful(
+          HttpResponse(OK, "")))
+
+      val request =
+        FakeRequest("POST", routes.MessageController.handleMessage().url)
+          .withHeaders(
+            "X-Message-Recipient" -> xMessageRecipient,
+            "X-Message-Type" -> xMessageType,
+            "Content-Type" -> "application/xml"
+          )
+          .withXmlBody(<xml>test</xml>)
+
+      val result = route(application, request).value
+
+      status(result) mustBe OK
+      header(LOCATION, result) mustBe None
     }
 
     "return BadRequest when X-Message-Recipient is not defined" in {
       when(mockRoutingService.sendMessage(any(), any(), any(), any())(any()))
-        .thenReturn(Future.successful(HttpResponse(OK)))
+        .thenReturn(Future.successful(HttpResponse(OK, "")))
 
       val request =
         FakeRequest("POST", routes.MessageController.handleMessage().url)
@@ -80,7 +102,7 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
 
     "return BadRequest when X-Message-Type is not defined" in {
       when(mockRoutingService.sendMessage(any(), any(), any(), any())(any()))
-        .thenReturn(Future.successful(HttpResponse(OK)))
+        .thenReturn(Future.successful(HttpResponse(OK, "")))
 
       val request =
         FakeRequest("POST", routes.MessageController.handleMessage().url)
@@ -95,7 +117,7 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
 
     "return a Bad Request when upstream returns a Bad Request" in {
       when(mockRoutingService.sendMessage(any(), any(), any(), any())(any()))
-        .thenReturn(Future.successful(HttpResponse(BAD_REQUEST)))
+        .thenReturn(Future.successful(HttpResponse(BAD_REQUEST, "")))
 
       val request =
         FakeRequest("POST", routes.MessageController.handleMessage().url)
@@ -113,7 +135,7 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
 
     "return a Not Found when upstream returns a Not Found" in {
       when(mockRoutingService.sendMessage(any(), any(), any(), any())(any()))
-        .thenReturn(Future.successful(HttpResponse(NOT_FOUND)))
+        .thenReturn(Future.successful(HttpResponse(NOT_FOUND, "")))
 
       val request =
         FakeRequest("POST", routes.MessageController.handleMessage().url)
@@ -131,7 +153,7 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
 
     "return a Locked when upstream returns a Locked" in {
       when(mockRoutingService.sendMessage(any(), any(), any(), any())(any()))
-        .thenReturn(Future.successful(HttpResponse(LOCKED)))
+        .thenReturn(Future.successful(HttpResponse(LOCKED, "")))
 
       val request =
         FakeRequest("POST", routes.MessageController.handleMessage().url)
@@ -149,7 +171,7 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
 
     "return Internal Server Error when upstream returns an Internal Server Error" in {
       when(mockRoutingService.sendMessage(any(), any(), any(), any())(any()))
-        .thenReturn(Future.successful(HttpResponse(INTERNAL_SERVER_ERROR)))
+        .thenReturn(Future.successful(HttpResponse(INTERNAL_SERVER_ERROR, "")))
 
       val fakeRequest =
         FakeRequest("POST", routes.MessageController.handleMessage().url)
