@@ -23,7 +23,7 @@ import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.http.Status
 import uk.gov.hmrc.http.HttpResponse
 
-class RoutingServiceSpec extends SpecBase with BeforeAndAfterEach with ScalaCheckPropertyChecks{
+class ResponseHelperSpec extends SpecBase with BeforeAndAfterEach with ScalaCheckPropertyChecks{
 
   class Harness extends ResponseHelper { }
 
