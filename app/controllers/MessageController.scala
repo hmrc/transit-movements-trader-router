@@ -24,6 +24,7 @@ import play.api.mvc.{Action, ControllerComponents}
 import services.RoutingService
 import uk.gov.hmrc.http.HttpReads.is2xx
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
+import utils.ResponseHelper
 
 import scala.concurrent.ExecutionContext
 import scala.xml.NodeSeq
@@ -34,7 +35,7 @@ class MessageController @Inject()(
   cc: ControllerComponents,
   routingService: RoutingService
 )(implicit val ec: ExecutionContext)
-    extends BackendController(cc) {
+    extends BackendController(cc) with ResponseHelper {
 
   def handleMessage(): Action[NodeSeq] =
     (messageRecipientIdentifier() andThen messageTypeIdentifier()).async(parse.xml) { implicit request =>
@@ -52,7 +53,7 @@ class MessageController @Inject()(
                     Status(response.status)
                 }
               case _ =>
-                Status(response.status)
+                handleNon2xx(response)
             }
         }
     }
