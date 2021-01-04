@@ -17,52 +17,36 @@
 package controllers.actions
 
 import base.SpecBase
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.mvc._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
-class MessageRecipientIdentifierActionSpec extends SpecBase {
+class HeaderLoggingActionSpec extends SpecBase with GuiceOneAppPerSuite {
 
-  class Harness(action: MessageRecipientIdentifierActionProvider) {
+  class Harness(action: HeaderLoggingAction, cc: ControllerComponents) {
 
-    def run(): Action[AnyContent] = action() { result =>
+    def run(): Action[AnyContent] = (DefaultActionBuilder.apply(cc.parsers.anyContent)(global) andThen action) { result =>
       Results.Ok("")
     }
   }
 
-  private def actionProvider =
-    applicationBuilder
-      .build()
-      .injector
-      .instanceOf[MessageRecipientIdentifierActionProvider]
-
-  private val xMessageRecipient = "MDTP-1-1"
-
-  "MessageSenderIdentifierAction" - {
-    "must return an BadRequest when the X-Message-Recipient is missing" in {
+  "HeaderLoggingAction" - {
+    "must pass on request" in {
       def fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("", "")
 
-      val controller: Harness = new Harness(actionProvider)
+      val headerLoggingAction = app.injector.instanceOf[HeaderLoggingAction]
 
-      val result: Future[Result] = controller.run()(fakeRequest)
+      val cc                  = app.injector.instanceOf[ControllerComponents]
 
-      status(result) mustEqual BAD_REQUEST
-    }
-
-    "will process the action when the X-Message-Recipient is present" in {
-      def fakeRequest: FakeRequest[AnyContentAsEmpty.type] =
-        FakeRequest("", "").withHeaders(
-          "X-Message-Recipient" -> xMessageRecipient
-        )
-
-      val controller: Harness = new Harness(actionProvider)
+      val controller: Harness = new Harness(headerLoggingAction, cc)
 
       val result: Future[Result] = controller.run()(fakeRequest)
 
       status(result) mustEqual OK
     }
-
   }
 }

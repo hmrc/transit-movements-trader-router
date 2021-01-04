@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +26,13 @@ import play.api.mvc._
 import scala.concurrent.{ExecutionContext, Future}
 
 class MessageRecipientIdentifierActionProvider @Inject()(
-  buildDefault: DefaultActionBuilder
+  buildDefault: DefaultActionBuilder,
+  headerLoggingAction: HeaderLoggingAction
 )(implicit val ec: ExecutionContext) {
   def apply(): ActionBuilder[MessageRecipientRequest, AnyContent] =
-    buildDefault andThen new MessageRecipientIdentifierAction(ec)
+    buildDefault andThen
+      headerLoggingAction andThen
+      new MessageRecipientIdentifierAction(ec)
 }
 
 class MessageRecipientIdentifierAction(val executionContext: ExecutionContext)
