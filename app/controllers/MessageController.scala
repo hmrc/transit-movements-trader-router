@@ -17,6 +17,7 @@
 package controllers
 
 import controllers.actions.{MessageRecipientIdentifierActionProvider, MessageTypeIdentifierActionProvider}
+import logging.Logging
 import play.api.Logger
 
 import javax.inject.Inject
@@ -35,7 +36,7 @@ class MessageController @Inject()(
   cc: ControllerComponents,
   routingService: RoutingService
 )(implicit val ec: ExecutionContext)
-    extends BackendController(cc) with ResponseHelper {
+    extends BackendController(cc) with ResponseHelper with Logging {
 
   def handleMessage(): Action[NodeSeq] =
     (messageRecipientIdentifier() andThen messageTypeIdentifier()).async(parse.xml) { implicit request =>
@@ -49,7 +50,7 @@ class MessageController @Inject()(
                   case Some(value) =>
                     Status(response.status).withHeaders(LOCATION -> value)
                   case None =>
-                    Logger.warn("No location header in downstream response")
+                    logger.warn("No location header in downstream response")
                     Status(response.status)
                 }
               case _ =>
