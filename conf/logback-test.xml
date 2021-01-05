@@ -7,6 +7,7 @@
     </encoder>
   </appender>
 
+  <logger name="application.filters.LoggingFilter" level="${logger.connector:-INFO}"/>
   <root level="OFF">
     <appender-ref ref="STDOUT"/>
   </root>
