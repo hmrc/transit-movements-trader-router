@@ -25,3 +25,11 @@ lazy val microservice = Project(appName, file("."))
   .settings(PlayKeys.playDefaultPort := 9486)
   .settings(useSuperShell in ThisBuild := false)
   .settings(scalaVersion := "2.12.11")
+  .settings(inConfig(Test)(testSettings): _*)
+
+lazy val testSettings = Seq(
+  fork := false,
+  javaOptions ++= Seq(
+    "-Dlogger.resource=logback-test.xml"
+  )
+)

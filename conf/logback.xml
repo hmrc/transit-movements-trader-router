@@ -50,7 +50,7 @@
     <logger name="application" level="WARN"/>
 
     <logger name="application.controllers.actions" level="${logger.connector:-WARN}"/>
-    <logger name="application.controllers.actions.HeaderLoggingAction" level="${logger.connector:-INFO}"/>
+    <logger name="application.filters.LoggingFilter" level="${logger.connector:-INFO}"/>
     <logger name="application.connectors" level="${logger.connector:-DEBUG}"/>
 
     <logger name="application.connectors" level="TRACE">

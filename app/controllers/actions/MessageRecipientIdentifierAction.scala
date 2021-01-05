@@ -26,12 +26,10 @@ import play.api.mvc._
 import scala.concurrent.{ExecutionContext, Future}
 
 class MessageRecipientIdentifierActionProvider @Inject()(
-  buildDefault: DefaultActionBuilder,
-  headerLoggingAction: HeaderLoggingAction
+  buildDefault: DefaultActionBuilder
 )(implicit val ec: ExecutionContext) {
   def apply(): ActionBuilder[MessageRecipientRequest, AnyContent] =
     buildDefault andThen
-      headerLoggingAction andThen
       new MessageRecipientIdentifierAction(ec)
 }
 
