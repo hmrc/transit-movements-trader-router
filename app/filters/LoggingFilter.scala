@@ -22,24 +22,31 @@ import logging.Logging
 import play.api.http.HeaderNames
 import play.api.mvc.{Filter, RequestHeader, Result}
 import utils.HttpHeaders
+import scala.concurrent.duration._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{Await, ExecutionContext, Future}
 
-class LoggingFilter @Inject() (implicit val mat: Materializer, ec: ExecutionContext) extends Filter with Logging {
+class LoggingFilter @Inject()(implicit val mat: Materializer, ec: ExecutionContext) extends Filter with Logging {
 
   def apply(next: RequestHeader => Future[Result])(rh: RequestHeader): Future[Result] = {
 
-    logger.info(
-      s"""
-         |Headers in inbound request:\n
-         |${HttpHeaders.X_CORRELATION_ID}: ${rh.headers.get(HttpHeaders.X_CORRELATION_ID).getOrElse("undefined")}\n
-         |${HttpHeaders.X_REQUEST_ID}: ${rh.headers.get(HttpHeaders.X_REQUEST_ID).getOrElse("undefined")}\n
-         |${HttpHeaders.X_MESSAGE_TYPE}: ${rh.headers.get(HttpHeaders.X_MESSAGE_TYPE).getOrElse("undefined")}\n
-         |${HttpHeaders.X_MESSAGE_RECIPIENT}: ${rh.headers.get(HttpHeaders.X_MESSAGE_RECIPIENT).getOrElse("undefined")}\n
-         |${HeaderNames.CONTENT_TYPE}: ${rh.headers.get(HeaderNames.CONTENT_TYPE).getOrElse("undefined")}
-         |""".stripMargin
-    )
-
-    next(rh)
+    next(rh).map { result =>
+      if (result.header.status > 399) {
+        val body = Await.result(result.body.consumeData, 10 nanos)
+        logger.info(
+          s"""
+             |Headers in inbound request:\n
+             |${HttpHeaders.X_CORRELATION_ID}: ${rh.headers.get(HttpHeaders.X_CORRELATION_ID).getOrElse("undefined")}\n
+             |${HttpHeaders.X_REQUEST_ID}: ${rh.headers.get(HttpHeaders.X_REQUEST_ID).getOrElse("undefined")}\n
+             |${HttpHeaders.X_MESSAGE_TYPE}: ${rh.headers.get(HttpHeaders.X_MESSAGE_TYPE).getOrElse("undefined")}\n
+             |${HttpHeaders.X_MESSAGE_RECIPIENT}: ${rh.headers.get(HttpHeaders.X_MESSAGE_RECIPIENT).getOrElse("undefined")}\n
+             |${HeaderNames.CONTENT_TYPE}: ${rh.headers.get(HeaderNames.CONTENT_TYPE).getOrElse("undefined")}
+             |Response status: ${result.header.status}
+             |Response body:  ${body.utf8String}
+           """.stripMargin
+        )
+      }
+      result
+    }
   }
 }
