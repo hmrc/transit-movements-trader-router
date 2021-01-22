@@ -17,14 +17,15 @@
 package filters
 
 import akka.stream.Materializer
+import akka.stream.scaladsl.Sink
+import akka.util.ByteString
 import javax.inject.Inject
 import logging.Logging
 import play.api.http.HeaderNames
 import play.api.mvc.{Filter, RequestHeader, Result}
 import utils.HttpHeaders
-import scala.concurrent.duration._
 
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext, Future}
 
 class LoggingFilter @Inject()(implicit val mat: Materializer, ec: ExecutionContext) extends Filter with Logging {
 
@@ -32,19 +33,25 @@ class LoggingFilter @Inject()(implicit val mat: Materializer, ec: ExecutionConte
 
     next(rh).map { result =>
       if (result.header.status > 399) {
-        val body = Await.result(result.body.consumeData, 10 nanos)
-        logger.info(
-          s"""
-             |Headers in inbound request:\n
-             |${HttpHeaders.X_CORRELATION_ID}: ${rh.headers.get(HttpHeaders.X_CORRELATION_ID).getOrElse("undefined")}\n
-             |${HttpHeaders.X_REQUEST_ID}: ${rh.headers.get(HttpHeaders.X_REQUEST_ID).getOrElse("undefined")}\n
-             |${HttpHeaders.X_MESSAGE_TYPE}: ${rh.headers.get(HttpHeaders.X_MESSAGE_TYPE).getOrElse("undefined")}\n
-             |${HttpHeaders.X_MESSAGE_RECIPIENT}: ${rh.headers.get(HttpHeaders.X_MESSAGE_RECIPIENT).getOrElse("undefined")}\n
-             |${HeaderNames.CONTENT_TYPE}: ${rh.headers.get(HeaderNames.CONTENT_TYPE).getOrElse("undefined")}
-             |Response status: ${result.header.status}
-             |Response body:  ${body.utf8String}
+        val sink = Sink.fold[String, ByteString]("") { case (acc, str) =>
+          acc + str.decodeString("UTF-8")
+        }
+
+        result.body.dataStream.runWith(sink).map {
+          body =>
+            logger.info(
+              s"""
+                 |Headers in inbound request:\n
+                 |${HttpHeaders.X_CORRELATION_ID}: ${rh.headers.get(HttpHeaders.X_CORRELATION_ID).getOrElse("undefined")}\n
+                 |${HttpHeaders.X_REQUEST_ID}: ${rh.headers.get(HttpHeaders.X_REQUEST_ID).getOrElse("undefined")}\n
+                 |${HttpHeaders.X_MESSAGE_TYPE}: ${rh.headers.get(HttpHeaders.X_MESSAGE_TYPE).getOrElse("undefined")}\n
+                 |${HttpHeaders.X_MESSAGE_RECIPIENT}: ${rh.headers.get(HttpHeaders.X_MESSAGE_RECIPIENT).getOrElse("undefined")}\n
+                 |${HeaderNames.CONTENT_TYPE}: ${rh.headers.get(HeaderNames.CONTENT_TYPE).getOrElse("undefined")}
+                 |Response status: ${result.header.status}\n
+                 |Response body:  ${body}
            """.stripMargin
-        )
+            )
+        }
       }
       result
     }
