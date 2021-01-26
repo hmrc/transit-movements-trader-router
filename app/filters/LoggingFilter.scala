@@ -32,21 +32,22 @@ class LoggingFilter @Inject()(implicit val mat: Materializer, ec: ExecutionConte
   def apply(next: RequestHeader => Future[Result])(rh: RequestHeader): Future[Result] = {
 
     next(rh).map { result =>
-      if (result.header.status > 399) {
-        val sink = Sink.fold[String, ByteString]("") { case (acc, str) =>
-          acc + str.decodeString("UTF-8")
-        }
+      if (rh.headers.get(HttpHeaders.X_MESSAGE_RECIPIENT).isDefined) {
+        val sink =
+          Sink.fold[String, ByteString]("") { case (acc, str) =>
+            acc + str.decodeString("UTF-8")
+          }
 
         result.body.dataStream.runWith(sink).map {
           body =>
             logger.info(
               s"""
-                 |Headers in inbound request:\n
+                 |Inbound request from EIS/NCTS:\n
                  |${HttpHeaders.X_CORRELATION_ID}: ${rh.headers.get(HttpHeaders.X_CORRELATION_ID).getOrElse("undefined")}\n
                  |${HttpHeaders.X_REQUEST_ID}: ${rh.headers.get(HttpHeaders.X_REQUEST_ID).getOrElse("undefined")}\n
                  |${HttpHeaders.X_MESSAGE_TYPE}: ${rh.headers.get(HttpHeaders.X_MESSAGE_TYPE).getOrElse("undefined")}\n
                  |${HttpHeaders.X_MESSAGE_RECIPIENT}: ${rh.headers.get(HttpHeaders.X_MESSAGE_RECIPIENT).getOrElse("undefined")}\n
-                 |${HeaderNames.CONTENT_TYPE}: ${rh.headers.get(HeaderNames.CONTENT_TYPE).getOrElse("undefined")}
+                 |${HeaderNames.CONTENT_TYPE}: ${rh.headers.get(HeaderNames.CONTENT_TYPE).getOrElse("undefined")}\n
                  |Response status: ${result.header.status}\n
                  |Response body:  ${body}
            """.stripMargin
