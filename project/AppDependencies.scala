@@ -9,6 +9,7 @@ object AppDependencies {
   val compile = Seq(
 
     "uk.gov.hmrc"             %% "bootstrap-backend-play-27"        % "3.2.0",
+    "com.typesafe.play"       %% "play-iteratees"                   % "2.6.1"
   )
 
   val test = Seq(
@@ -17,8 +18,8 @@ object AppDependencies {
     "com.typesafe.play"       %% "play-test"                % current                 % "test",
     "org.pegdown"             %  "pegdown"                  % "1.6.0"                 % "test, it",
     "org.scalatestplus.play"  %% "scalatestplus-play"       % "3.1.2"                 % "test, it",
-    "org.mockito"             %  "mockito-all"               % "1.10.19" % "test, it",
-    "org.scalacheck"          %% "scalacheck"               % "1.14.0" % "test, it",
-    "com.github.tomakehurst"  %  "wiremock-standalone"       % "2.25.0" % "test, it"
+    "org.mockito"             %  "mockito-all"              % "1.10.19"               % "test, it",
+    "org.scalacheck"          %% "scalacheck"               % "1.14.0"                % "test, it",
+    "com.github.tomakehurst"  %  "wiremock-standalone"      % "2.25.0"                % "test, it"
   )
 }

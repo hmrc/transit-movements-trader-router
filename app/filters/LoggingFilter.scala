@@ -51,7 +51,7 @@ class LoggingFilter @Inject()(implicit val mat: Materializer, ec: ExecutionConte
               HeaderNames.CONTENT_TYPE -> rh.headers.get(HeaderNames.CONTENT_TYPE).getOrElse("undefined"),
               "status" -> result.header.status.toString,
               "Response body" -> body
-            ).toMap
+            )
 
             logger.info(
               s"""
@@ -59,11 +59,6 @@ class LoggingFilter @Inject()(implicit val mat: Materializer, ec: ExecutionConte
                  | ${Json.stringify(Json.toJson(details))}\n
                  """.stripMargin
             )
-
-            if (result.header.status > 399) {
-              val hc = HeaderCarrier()
-              auditService.auditEvent(AuditType.NCTSMessageRejected, details, requestBody???)(hc)
-            }
         }
 
       }
