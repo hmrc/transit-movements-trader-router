@@ -115,6 +115,13 @@ class MessageTypeSpec extends SpecBase with ScalaCheckDrivenPropertyChecks {
       GoodsReleased.rootNode mustEqual "CC025A"
       MessageType.arrivalValues must contain(GoodsReleased)
     }
+
+    "InvalidXml" in {
+      MessageType.allMessages must contain(InvalidXml)
+      InvalidXml.code mustEqual "IE917"
+      InvalidXml.rootNode mustEqual "CC917A"
+      MessageType.arrivalValues must contain(InvalidXml)
+    }
   }
 
   "Json reads and writes" - {
