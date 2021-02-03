@@ -116,11 +116,11 @@ class MessageTypeSpec extends SpecBase with ScalaCheckDrivenPropertyChecks {
       MessageType.arrivalValues must contain(GoodsReleased)
     }
 
-    "XMLSubmissionNegativeAcknowledgement" in {
-      MessageType.allMessages must contain(XMLSubmissionNegativeAcknowledgement)
-      XMLSubmissionNegativeAcknowledgement.code mustEqual "IE917"
-      XMLSubmissionNegativeAcknowledgement.rootNode mustEqual "CC917A"
-      MessageType.arrivalValues must contain(XMLSubmissionNegativeAcknowledgement)
+    "InvalidXml" in {
+      MessageType.allMessages must contain(InvalidXml)
+      InvalidXml.code mustEqual "IE917"
+      InvalidXml.rootNode mustEqual "CC917A"
+      MessageType.arrivalValues must contain(InvalidXml)
     }
   }
 
