@@ -17,10 +17,13 @@
 package controllers.actions
 
 import base.SpecBase
+import models.{Directable, MessageType}
 import models.MessageType.PositiveAcknowledgement
 import models.requests.{MessageRecipientRequest, RoutableRequest}
+import org.scalacheck.Gen
 import org.scalatest.EitherValues
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.mvc._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -28,9 +31,9 @@ import play.api.test.Helpers._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class MessageTypeIdentifierActionSpec extends SpecBase with ScalaFutures with EitherValues {
+class MessageTypeIdentifierActionSpec extends SpecBase with ScalaFutures with EitherValues with ScalaCheckDrivenPropertyChecks {
 
-  private val xMessageType = PositiveAcknowledgement
+  private val genXMessageType: Gen[Directable] = Gen.oneOf(MessageType.validMessages)
 
   class Harness extends MessageTypeIdentifierAction(global) {
     def run[A](request: MessageRecipientRequest[A]): Future[Either[Result, RoutableRequest[A]]]
@@ -53,23 +56,26 @@ class MessageTypeIdentifierActionSpec extends SpecBase with ScalaFutures with Ei
     }
 
     "will process the action when the X-Message-Type is present" in {
-      def fakeRequest = MessageRecipientRequest(FakeRequest("","").withHeaders(
-        "X-Message-Type" -> xMessageType.code
-      ), "abc")
+      forAll(genXMessageType) {
+        xMessageType =>
+        def fakeRequest = MessageRecipientRequest(FakeRequest("", "").withHeaders(
+          "X-Message-Type" -> xMessageType.code
+        ), "abc")
 
-      val action: Harness = new Harness()
+        val action: Harness = new Harness()
 
-      val result = action.run(fakeRequest)
+        val result = action.run(fakeRequest)
 
-      whenReady(result) {
-        r =>
-          r.isRight mustBe true
+        whenReady(result) {
+          r =>
+            r.isRight mustBe true
+        }
       }
     }
 
     "will respond with NotImplemented when the X-Message-Type is not supported" in {
       def fakeRequest = MessageRecipientRequest(FakeRequest("","").withHeaders(
-        "X-Message-Type" -> "IE917"
+        "X-Message-Type" -> "IE971"
       ), "abc")
 
       val action: Harness = new Harness()
