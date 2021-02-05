@@ -23,11 +23,8 @@ import org.scalacheck.Gen
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.{FreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
-import play.api.Application
 import play.api.http.Status._
-import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.Headers
 import uk.gov.hmrc.http.HeaderCarrier
 

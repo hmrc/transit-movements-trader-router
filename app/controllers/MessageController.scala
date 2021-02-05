@@ -18,12 +18,10 @@ package controllers
 
 import controllers.actions.{MessageRecipientIdentifierActionProvider, MessageTypeIdentifierActionProvider}
 import logging.Logging
-import play.api.Logger
 
 import javax.inject.Inject
 import play.api.mvc.{Action, ControllerComponents}
 import services.RoutingService
-import uk.gov.hmrc.http.HttpReads.is2xx
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import utils.ResponseHelper
 
