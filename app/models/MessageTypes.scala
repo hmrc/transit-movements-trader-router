@@ -31,6 +31,7 @@ object MessageType extends Enumerable.Implicits {
   case object UnloadingPermission       extends IeMetadata("IE043", "CC043A") with ArrivalMessage
   case object UnloadingRemarksRejection extends IeMetadata("IE058", "CC058A") with ArrivalMessage
   case object GoodsReleased             extends IeMetadata("IE025", "CC025A") with ArrivalMessage
+  case object XMLSubmissionNegativeAcknowledgement                extends IeMetadata("IE917", "CC917A") with ArrivalMessage
 
   case object PositiveAcknowledgement        extends IeMetadata("IE928", "CC928A") with DepartureMessage
   case object MrnAllocated                   extends IeMetadata("IE028", "CC028A") with DepartureMessage
@@ -45,7 +46,7 @@ object MessageType extends Enumerable.Implicits {
   val departureValues: Seq[Directable] = Seq(PositiveAcknowledgement, MrnAllocated, DeclarationRejected, ControlDecisionNotification, NoReleaseForTransit,
     ReleaseForTransit, CancellationDecision, WriteOffNotification, GuaranteeNotValid)
 
-  val arrivalValues: Seq[Directable] = Seq(ArrivalRejection, UnloadingPermission, UnloadingRemarksRejection, GoodsReleased)
+  val arrivalValues: Seq[Directable] = Seq(ArrivalRejection, UnloadingPermission, UnloadingRemarksRejection, GoodsReleased, XMLSubmissionNegativeAcknowledgement)
 
   val validMessages: Seq[Directable] = departureValues ++ arrivalValues
 
