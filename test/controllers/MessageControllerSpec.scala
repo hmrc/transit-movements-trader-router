@@ -17,7 +17,6 @@
 package controllers
 
 import base.SpecBase
-import connectors.DestinationConnector
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{reset, when}
 import org.scalatest.BeforeAndAfterEach

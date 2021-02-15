@@ -18,7 +18,7 @@ package services
 
 import connectors.{DepartureConnector, DestinationConnector}
 import javax.inject.Inject
-import models.{Directable, MessageType}
+import models.Directable
 import play.api.mvc.Headers
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import scala.concurrent.Future

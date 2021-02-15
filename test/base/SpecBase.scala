@@ -18,7 +18,6 @@ package base
 
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
 import org.scalatestplus.mockito.MockitoSugar
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Configuration
 import play.api.inject.guice.GuiceApplicationBuilder
 import uk.gov.hmrc.http.HeaderCarrier
