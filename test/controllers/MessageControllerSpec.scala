@@ -134,7 +134,6 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
       val result = route(application, request).value
 
       status(result) mustBe BAD_REQUEST
-      contentAsString(result) mustBe empty
     }
 
     "return a Bad Request with response body when upstream returns a Bad Request with response body" in {
@@ -153,7 +152,7 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
       val result = route(application, request).value
 
       status(result) mustBe BAD_REQUEST
-      contentAsString(result) mustEqual "message"
+      contentAsString(result).endsWith("message") mustBe true
     }
 
     "return a Not Found when upstream returns a Not Found" in {

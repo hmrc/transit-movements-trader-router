@@ -16,13 +16,24 @@
 
 package utils
 
+import logging.Logging
 import play.api.http.Status
 import play.api.mvc.{Result, Results}
 import uk.gov.hmrc.http.{HttpErrorFunctions, HttpResponse}
 
-trait ResponseHelper extends Results with Status with HttpErrorFunctions {
+trait ResponseHelper extends Results with Status with HttpErrorFunctions with Logging{
   def handleNon2xx(response: HttpResponse): Result = {
     response.status match {
+      case s if s == 400 =>{
+        val message = if (response.body != null) {
+          s"Incoming Router Rejected: Downstream service rejected with following message: ${response.body}"
+        }
+        else {
+          "Incoming Router Rejected: Downstream service rejected with no message"
+        }
+        logger.warn(message)
+        BadRequest(message)
+      }
       case s if is4xx(s) => if (response.body != null) Status(response.status)(response.body) else Status(response.status)
       case _ => Status(response.status)
     }
