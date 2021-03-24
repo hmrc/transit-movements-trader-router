@@ -41,7 +41,6 @@ class MessageTypeIdentifierAction(val ec: ExecutionContext)
     request.headers
       .get("X-Message-Type") match {
       case None =>
-        logger.warn("Inbound Router Rejected: missing header key X-Message-Type")
         logger.warn("BadRequest: missing header key X-Message-Type")
         Future.successful(Left(BadRequest("BadRequest: missing header key X-Message-Type")))
 

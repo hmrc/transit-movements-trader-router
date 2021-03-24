@@ -44,7 +44,6 @@ class MessageRecipientIdentifierAction(val executionContext: ExecutionContext)
       request.headers
         .get("X-Message-Recipient")
         .toRight {
-          logger.warn("Inbound Router Rejected: missing header key X-Message-Recipient")
           logger.error("BadRequest: missing header key X-Message-Recipient")
           BadRequest
         }
