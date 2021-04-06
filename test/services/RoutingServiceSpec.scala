@@ -18,6 +18,7 @@ package services
 
 import base.SpecBase
 import connectors.{DepartureConnector, DestinationConnector}
+import models.MessageType.XMLSubmissionNegativeAcknowledgement
 import models.{Directable, MessageType}
 import org.scalatest.BeforeAndAfterEach
 import org.mockito.Matchers.any
@@ -70,6 +71,54 @@ class RoutingServiceSpec extends SpecBase with BeforeAndAfterEach with ScalaChec
         verify(mockDestinationConnector, times(1)).sendMessage(any(), any(), any())(any())
 
       }
+    }
+
+    "use DepartureConnector when forwarding a 917 message with DEP header" in {
+
+      val messageType = XMLSubmissionNegativeAcknowledgement
+        val mockDepartureConnector = mock[DepartureConnector]
+        val mockDestinationConnector = mock[DestinationConnector]
+
+        when(mockDestinationConnector.sendMessage(any(), any(), any())(any())).thenReturn(Future.successful(HttpResponse(200, "")))
+        val sut = new RoutingService(mockDestinationConnector, mockDepartureConnector)
+
+        sut.sendMessage("MDTP-DEP-1-1", messageType, <Abc>123</Abc>, Headers())(HeaderCarrier())
+
+        verify(mockDepartureConnector, times(1)).sendMessage(any(), any(), any())(any())
+        verify(mockDestinationConnector, times(0)).sendMessage(any(), any(), any())(any())
+
+    }
+
+    "use DestinationConnector when forwarding a 917 message with an ARR header" in {
+
+      val messageType = XMLSubmissionNegativeAcknowledgement
+      val mockDepartureConnector = mock[DepartureConnector]
+      val mockDestinationConnector = mock[DestinationConnector]
+
+      when(mockDestinationConnector.sendMessage(any(), any(), any())(any())).thenReturn(Future.successful(HttpResponse(200, "")))
+      val sut = new RoutingService(mockDestinationConnector, mockDepartureConnector)
+
+      sut.sendMessage("MDTP-ARR-1-1", messageType, <Abc>123</Abc>, Headers())(HeaderCarrier())
+
+      verify(mockDepartureConnector, times(0)).sendMessage(any(), any(), any())(any())
+      verify(mockDestinationConnector, times(1)).sendMessage(any(), any(), any())(any())
+
+    }
+
+    "use DestinationConnector when forwarding a 917 message without ARR or DEP in header" in {
+
+      val messageType = XMLSubmissionNegativeAcknowledgement
+      val mockDepartureConnector = mock[DepartureConnector]
+      val mockDestinationConnector = mock[DestinationConnector]
+
+      when(mockDestinationConnector.sendMessage(any(), any(), any())(any())).thenReturn(Future.successful(HttpResponse(200, "")))
+      val sut = new RoutingService(mockDestinationConnector, mockDepartureConnector)
+
+      sut.sendMessage("MDTP-1-1", messageType, <Abc>123</Abc>, Headers())(HeaderCarrier())
+
+      verify(mockDepartureConnector, times(0)).sendMessage(any(), any(), any())(any())
+      verify(mockDestinationConnector, times(1)).sendMessage(any(), any(), any())(any())
+
     }
   }
 }

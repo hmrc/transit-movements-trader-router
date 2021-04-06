@@ -18,6 +18,6 @@ package models.requests
 
 import play.api.mvc.{Request, WrappedRequest}
 
-case class MessageRecipientRequest[A](request: Request[A],
+case class  MessageRecipientRequest[A](request: Request[A],
                                       messageRecipient: String)
     extends WrappedRequest[A](request)

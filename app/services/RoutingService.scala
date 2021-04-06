@@ -17,23 +17,29 @@
 package services
 
 import connectors.{DepartureConnector, DestinationConnector}
-import javax.inject.Inject
-import models.Directable
+import models.{ArrivalMessage, DepartureMessage, Directable}
 import play.api.mvc.Headers
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+
+import javax.inject.Inject
 import scala.concurrent.Future
 import scala.xml.NodeSeq
-import models.ArrivalMessage
-import models.DepartureMessage
 
 class RoutingService @Inject()(destinationConnector: DestinationConnector, departureConnector: DepartureConnector) {
 
-    def sendMessage(messageRecipient: String, directable: Directable, messageBody: NodeSeq, headers: Headers)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
-            directable match {
-                case _:ArrivalMessage =>
-                    destinationConnector.sendMessage(messageRecipient, messageBody, headers)
-                case _:DepartureMessage =>
-                    departureConnector.sendMessage(messageRecipient, messageBody, headers)
-            }
-        }
+
+  def sendMessage(messageRecipient: String, directable: Directable, messageBody: NodeSeq, headers: Headers)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+
+    directable match {
+      case _: ArrivalMessage =>
+        destinationConnector.sendMessage(messageRecipient, messageBody, headers)
+      case _: DepartureMessage =>
+        departureConnector.sendMessage(messageRecipient, messageBody, headers)
+      case _ =>
+        if (messageRecipient.toUpperCase.startsWith("MDTP-DEP-"))
+            departureConnector.sendMessage(messageRecipient, messageBody, headers)
+        else
+            destinationConnector.sendMessage(messageRecipient, messageBody, headers)
+    }
+  }
 }
