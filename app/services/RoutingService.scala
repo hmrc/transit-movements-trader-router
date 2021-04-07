@@ -17,7 +17,7 @@
 package services
 
 import connectors.{DepartureConnector, DestinationConnector}
-import models.{ArrivalMessage, DepartureMessage, Directable}
+import models.{ArrivalMessage, ArrivalRecipient, DepartureMessage, DepartureRecipient, Directable, MessageRecipient}
 import play.api.mvc.Headers
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
@@ -28,7 +28,7 @@ import scala.xml.NodeSeq
 class RoutingService @Inject()(destinationConnector: DestinationConnector, departureConnector: DepartureConnector) {
 
 
-  def sendMessage(messageRecipient: String, directable: Directable, messageBody: NodeSeq, headers: Headers)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+  def sendMessage(messageRecipient: MessageRecipient, directable: Directable, messageBody: NodeSeq, headers: Headers)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
 
     directable match {
       case _: ArrivalMessage =>
@@ -36,10 +36,12 @@ class RoutingService @Inject()(destinationConnector: DestinationConnector, depar
       case _: DepartureMessage =>
         departureConnector.sendMessage(messageRecipient, messageBody, headers)
       case _ =>
-        if (messageRecipient.toUpperCase.startsWith("MDTP-DEP-"))
-            departureConnector.sendMessage(messageRecipient, messageBody, headers)
-        else
-            destinationConnector.sendMessage(messageRecipient, messageBody, headers)
+        messageRecipient match {
+          case departureRecipient: DepartureRecipient =>
+            departureConnector.sendMessage(departureRecipient, messageBody, headers)
+          case arrivalRecipient: ArrivalRecipient =>
+            destinationConnector.sendMessage(arrivalRecipient, messageBody, headers)
+        }
     }
   }
 }
