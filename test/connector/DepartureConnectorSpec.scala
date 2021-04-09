@@ -19,6 +19,7 @@ package connector
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, post, urlEqualTo}
 import connectors.DepartureConnector
 import helper.WireMockServerHandler
+import models.MessageRecipient
 import org.scalacheck.Gen
 import org.scalatest.{FreeSpec, MustMatchers}
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
@@ -42,7 +43,7 @@ class DepartureConnectorSpec extends FreeSpec
   private val startUrl =
     "transits-movements-trader-at-departure/movements/departures"
   val sampleXml: Elem = <xml>test</xml>
-  val xMessageRecipient = "MDTP-1-1"
+  val messageRecipient = MessageRecipient("MDTP-DEP-1-1")
 
   implicit val hc: HeaderCarrier =
     HeaderCarrier().withExtraHeaders("X-Test-Header" -> "X-Test-Header-Value")
@@ -54,14 +55,14 @@ class DepartureConnectorSpec extends FreeSpec
     "must return status as OK for valid input request" in {
 
       server.stubFor(
-        post(urlEqualTo(s"/$startUrl/$xMessageRecipient/messages/eis"))
+        post(urlEqualTo(s"/$startUrl/${messageRecipient.headerValue}/messages/eis"))
           .willReturn(
             aResponse()
               .withStatus(OK)
           )
       )
 
-      val result = connector.sendMessage(xMessageRecipient, sampleXml, Headers())
+      val result = connector.sendMessage(messageRecipient, sampleXml, Headers())
       result.futureValue.status mustBe OK
     }
 
@@ -71,14 +72,14 @@ class DepartureConnectorSpec extends FreeSpec
 
       forAll(errorResponses) { errorResponse =>
         server.stubFor(
-          post(urlEqualTo(s"/$startUrl/$xMessageRecipient/messages/eis"))
+          post(urlEqualTo(s"/$startUrl/${messageRecipient.headerValue}/messages/eis"))
             .willReturn(
               aResponse()
                 .withStatus(errorResponse)
             )
         )
 
-        val result = connector.sendMessage(xMessageRecipient, sampleXml, Headers())
+        val result = connector.sendMessage(messageRecipient, sampleXml, Headers())
 
         result.futureValue.status mustBe errorResponse
 

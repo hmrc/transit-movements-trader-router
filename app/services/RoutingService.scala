@@ -17,23 +17,31 @@
 package services
 
 import connectors.{DepartureConnector, DestinationConnector}
-import javax.inject.Inject
-import models.Directable
+import models.{ArrivalMessage, ArrivalRecipient, DepartureMessage, DepartureRecipient, Directable, MessageRecipient}
 import play.api.mvc.Headers
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+
+import javax.inject.Inject
 import scala.concurrent.Future
 import scala.xml.NodeSeq
-import models.ArrivalMessage
-import models.DepartureMessage
 
 class RoutingService @Inject()(destinationConnector: DestinationConnector, departureConnector: DepartureConnector) {
 
-    def sendMessage(messageRecipient: String, directable: Directable, messageBody: NodeSeq, headers: Headers)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
-            directable match {
-                case _:ArrivalMessage =>
-                    destinationConnector.sendMessage(messageRecipient, messageBody, headers)
-                case _:DepartureMessage =>
-                    departureConnector.sendMessage(messageRecipient, messageBody, headers)
-            }
+
+  def sendMessage(messageRecipient: MessageRecipient, directable: Directable, messageBody: NodeSeq, headers: Headers)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+
+    directable match {
+      case _: ArrivalMessage =>
+        destinationConnector.sendMessage(messageRecipient, messageBody, headers)
+      case _: DepartureMessage =>
+        departureConnector.sendMessage(messageRecipient, messageBody, headers)
+      case _ =>
+        messageRecipient match {
+          case departureRecipient: DepartureRecipient =>
+            departureConnector.sendMessage(departureRecipient, messageBody, headers)
+          case arrivalRecipient: ArrivalRecipient =>
+            destinationConnector.sendMessage(arrivalRecipient, messageBody, headers)
         }
+    }
+  }
 }

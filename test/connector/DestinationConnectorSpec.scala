@@ -19,7 +19,9 @@ package connector
 import com.github.tomakehurst.wiremock.client.WireMock._
 import connectors.DestinationConnector
 import helper.WireMockServerHandler
+import models.{ArrivalRecipient, MessageRecipient}
 import org.scalacheck.Gen
+import org.scalatest.Matchers.convertToAnyShouldWrapper
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.{FreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
@@ -43,7 +45,9 @@ class DestinationConnectorSpec
   private val startUrl =
     "transit-movements-trader-at-destination/movements/arrivals"
   val sampleXml: Elem = <xml>test</xml>
-  val xMessageRecipient = "MDTP-1-1"
+
+  val xMessageRecipient = "MDTP-ARR-1-1"
+  val messageRecipient: MessageRecipient = MessageRecipient(xMessageRecipient)
 
   implicit val hc: HeaderCarrier =
     HeaderCarrier().withExtraHeaders("X-Test-Header" -> "X-Test-Header-Value")
@@ -62,7 +66,7 @@ class DestinationConnectorSpec
           )
       )
 
-      val result = connector.sendMessage(xMessageRecipient, sampleXml, Headers())
+      val result = connector.sendMessage(messageRecipient, sampleXml, Headers())
       result.futureValue.status mustBe OK
     }
 
@@ -72,14 +76,14 @@ class DestinationConnectorSpec
 
       forAll(errorResponses) { errorResponse =>
         server.stubFor(
-          post(urlEqualTo(s"/$startUrl/$xMessageRecipient/messages/eis"))
+          post(urlEqualTo(s"/$startUrl/${messageRecipient.headerValue}/messages/eis"))
             .willReturn(
               aResponse()
                 .withStatus(errorResponse)
             )
         )
 
-        val result = connector.sendMessage(xMessageRecipient, sampleXml, Headers())
+        val result = connector.sendMessage(messageRecipient, sampleXml, Headers())
 
         result.futureValue.status mustBe errorResponse
 

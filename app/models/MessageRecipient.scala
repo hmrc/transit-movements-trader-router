@@ -14,11 +14,21 @@
  * limitations under the License.
  */
 
-package models.requests
+package models
 
-import models.{Directable, MessageRecipient}
-import play.api.mvc.WrappedRequest
+sealed trait MessageRecipient {
+  val headerValue: String
+}
 
-case class RoutableRequest[A](request: MessageRecipientRequest[A], directable: Directable) extends WrappedRequest[A](request){
-  def messageRecipient:MessageRecipient = request.messageRecipient
+case class ArrivalRecipient(headerValue: String) extends MessageRecipient
+
+case class DepartureRecipient(headerValue: String) extends MessageRecipient
+
+object MessageRecipient {
+  def apply(headerValue: String): MessageRecipient = {
+    if (headerValue matches "(?i)MDTP-DEP-.*")
+      DepartureRecipient(headerValue)
+    else
+      ArrivalRecipient(headerValue)
+  }
 }

@@ -18,7 +18,7 @@ package controllers.actions
 
 import com.google.inject.Inject
 import logging.Logging
-import models.requests
+import models.{MessageRecipient, requests}
 import models.requests.MessageRecipientRequest
 import play.api.mvc.Results.BadRequest
 import play.api.mvc._
@@ -48,6 +48,6 @@ class MessageRecipientIdentifierAction(val executionContext: ExecutionContext)
           BadRequest
         }
         .right
-        .map(requests.MessageRecipientRequest(request, _))
+        .map(x => requests.MessageRecipientRequest(request, MessageRecipient(x)))
     }
 }

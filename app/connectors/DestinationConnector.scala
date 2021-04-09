@@ -17,6 +17,8 @@
 package connectors
 
 import config.AppConfig
+import models.MessageRecipient
+
 import javax.inject.Inject
 import play.api.mvc.Headers
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
@@ -30,13 +32,13 @@ class DestinationConnector @Inject()(
 )(implicit ec: ExecutionContext) {
 
   def sendMessage(
-                   xMessageRecipient: String,
+                   xMessageRecipient: MessageRecipient,
                    requestData: NodeSeq,
                    headers: Headers
   )(implicit hc: HeaderCarrier): Future[HttpResponse] = {
 
     val serviceUrl =
-      s"${config.traderAtDestinationUrl.baseUrl}/movements/arrivals/$xMessageRecipient/messages/eis"
+      s"${config.traderAtDestinationUrl.baseUrl}/movements/arrivals/${xMessageRecipient.headerValue}/messages/eis"
 
     val header = headers.headers.filter(
       header =>

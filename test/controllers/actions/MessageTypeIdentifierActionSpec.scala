@@ -17,8 +17,7 @@
 package controllers.actions
 
 import base.SpecBase
-import models.{Directable, MessageType}
-import models.MessageType.PositiveAcknowledgement
+import models.{Directable, MessageRecipient, MessageType}
 import models.requests.{MessageRecipientRequest, RoutableRequest}
 import org.scalacheck.Gen
 import org.scalatest.EitherValues
@@ -42,7 +41,7 @@ class MessageTypeIdentifierActionSpec extends SpecBase with ScalaFutures with Ei
 
   "MessageTypeIdentifierAction" - {
     "must return an BadRequest when the X-Message-Type is missing" in {
-      def fakeRequest = MessageRecipientRequest(FakeRequest("",""), "abc")
+      def fakeRequest = MessageRecipientRequest(FakeRequest("",""), MessageRecipient("MDTP-1-1"))
 
       val harness = new Harness
 
@@ -60,7 +59,7 @@ class MessageTypeIdentifierActionSpec extends SpecBase with ScalaFutures with Ei
         xMessageType =>
         def fakeRequest = MessageRecipientRequest(FakeRequest("", "").withHeaders(
           "X-Message-Type" -> xMessageType.code
-        ), "abc")
+        ), MessageRecipient("MDTP-1-1"))
 
         val action: Harness = new Harness()
 
@@ -76,7 +75,7 @@ class MessageTypeIdentifierActionSpec extends SpecBase with ScalaFutures with Ei
     "will respond with NotImplemented when the X-Message-Type is not supported" in {
       def fakeRequest = MessageRecipientRequest(FakeRequest("","").withHeaders(
         "X-Message-Type" -> "IE971"
-      ), "abc")
+      ), MessageRecipient("MDTP-1-1"))
 
       val action: Harness = new Harness()
 

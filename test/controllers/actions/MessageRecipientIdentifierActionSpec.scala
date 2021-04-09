@@ -17,6 +17,7 @@
 package controllers.actions
 
 import base.SpecBase
+import models.MessageRecipient
 import play.api.mvc._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -38,7 +39,7 @@ class MessageRecipientIdentifierActionSpec extends SpecBase {
       .injector
       .instanceOf[MessageRecipientIdentifierActionProvider]
 
-  private val xMessageRecipient = "MDTP-1-1"
+  private val messageRecipient = MessageRecipient("MDTP-1-1")
 
   "MessageSenderIdentifierAction" - {
     "must return an BadRequest when the X-Message-Recipient is missing" in {
@@ -54,7 +55,7 @@ class MessageRecipientIdentifierActionSpec extends SpecBase {
     "will process the action when the X-Message-Recipient is present" in {
       def fakeRequest: FakeRequest[AnyContentAsEmpty.type] =
         FakeRequest("", "").withHeaders(
-          "X-Message-Recipient" -> xMessageRecipient
+          "X-Message-Recipient" -> messageRecipient.headerValue
         )
 
       val controller: Harness = new Harness(actionProvider)
