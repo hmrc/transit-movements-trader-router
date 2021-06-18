@@ -27,9 +27,15 @@ import utils.HttpHeaders
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class LoggingFilter @Inject()(implicit val mat: Materializer, ec: ExecutionContext) extends Filter with Logging {
+class LoggingFilter @Inject() (implicit
+    val mat: Materializer,
+    ec: ExecutionContext
+) extends Filter
+    with Logging {
 
-  def apply(next: RequestHeader => Future[Result])(rh: RequestHeader): Future[Result] = {
+  def apply(
+      next: RequestHeader => Future[Result]
+  )(rh: RequestHeader): Future[Result] = {
 
     next(rh).map { result =>
       if (rh.headers.get(HttpHeaders.X_MESSAGE_RECIPIENT).isDefined) {
@@ -38,20 +44,25 @@ class LoggingFilter @Inject()(implicit val mat: Materializer, ec: ExecutionConte
             acc + str.decodeString("UTF-8")
           }
 
-        result.body.dataStream.runWith(sink).map {
-          body =>
-            logger.info(
-              s"""
-                 |Inbound request from EIS/NCTS:\n
-                 |${HttpHeaders.X_CORRELATION_ID}: ${rh.headers.get(HttpHeaders.X_CORRELATION_ID).getOrElse("undefined")}\n
-                 |${HttpHeaders.X_REQUEST_ID}: ${rh.headers.get(HttpHeaders.X_REQUEST_ID).getOrElse("undefined")}\n
-                 |${HttpHeaders.X_MESSAGE_TYPE}: ${rh.headers.get(HttpHeaders.X_MESSAGE_TYPE).getOrElse("undefined")}\n
-                 |${HttpHeaders.X_MESSAGE_RECIPIENT}: ${rh.headers.get(HttpHeaders.X_MESSAGE_RECIPIENT).getOrElse("undefined")}\n
-                 |${HeaderNames.CONTENT_TYPE}: ${rh.headers.get(HeaderNames.CONTENT_TYPE).getOrElse("undefined")}\n
-                 |Response status: ${result.header.status}\n
-                 |Response body:  ${body}
+        result.body.dataStream.runWith(sink).map { body =>
+          val logMessage =
+            s"""
+              |${HttpHeaders.X_CORRELATION_ID}: ${rh.headers.get(HttpHeaders.X_CORRELATION_ID).getOrElse("undefined")}
+              |${HttpHeaders.X_REQUEST_ID}: ${rh.headers.get(HttpHeaders.X_REQUEST_ID).getOrElse("undefined")}
+              |${HttpHeaders.X_MESSAGE_TYPE}: ${rh.headers.get(HttpHeaders.X_MESSAGE_TYPE).getOrElse("undefined")}
+              |${HttpHeaders.X_MESSAGE_RECIPIENT}: ${rh.headers.get(HttpHeaders.X_MESSAGE_RECIPIENT).getOrElse("undefined")}
+              |${HeaderNames.CONTENT_TYPE}: ${rh.headers.get(HeaderNames.CONTENT_TYPE).getOrElse("undefined")}
+              |Response status: ${result.header.status}
+              |Response body:  ${body}
            """.stripMargin
-            )
+
+          if (result.header.status < 400) {
+            logger.info(logMessage)
+          } else if (result.header.status >= 400 && result.header.status < 499) {
+            logger.warn(logMessage)
+          } else {
+            logger.error(logMessage)
+          }
         }
       }
       result
