@@ -19,11 +19,11 @@ package connector
 import com.github.tomakehurst.wiremock.client.WireMock._
 import connectors.DestinationConnector
 import helper.WireMockServerHandler
-import models.{ArrivalRecipient, MessageRecipient}
+import models.MessageRecipient
 import org.scalacheck.Gen
-import org.scalatest.Matchers.convertToAnyShouldWrapper
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
-import org.scalatest.{FreeSpec, MustMatchers}
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.http.Status._
@@ -33,14 +33,14 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.xml.Elem
 
 class DestinationConnectorSpec
-    extends FreeSpec
-    with MustMatchers
+  extends AnyFreeSpec
+    with Matchers
     with ScalaFutures
     with IntegrationPatience
     with WireMockServerHandler
     with ScalaCheckPropertyChecks
     with MockitoSugar
-    {
+{
 
   private val startUrl =
     "transit-movements-trader-at-destination/movements/arrivals"

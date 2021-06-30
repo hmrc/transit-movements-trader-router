@@ -16,26 +16,29 @@
 
 package connectors
 
+import com.kenshoo.play.metrics.Metrics
 import config.AppConfig
 import models.MessageRecipient
-
 import javax.inject.Inject
+import metrics.HasMetrics
 import play.api.mvc.Headers
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.xml.NodeSeq
+import metrics.MetricsKeys.Connectors._
 
 class DepartureConnector @Inject()(
                                    config: AppConfig,
-                                   http: HttpClient
-                                 )(implicit ec: ExecutionContext) {
+                                   http: HttpClient,
+                                   val metrics: Metrics
+                                 )(implicit ec: ExecutionContext) extends HasMetrics {
 
   def sendMessage(
                    messageRecipient: MessageRecipient,
                    requestData: NodeSeq,
                    headers: Headers
-                 )(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+                 )(implicit hc: HeaderCarrier): Future[HttpResponse] = withMetricsTimerResponse(RouteToDepartures){
 
     val serviceUrl =
       s"${config.traderAtDepartureUrl.baseUrl}/movements/departures/${messageRecipient.headerValue}/messages/eis"

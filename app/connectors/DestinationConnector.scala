@@ -16,10 +16,12 @@
 
 package connectors
 
+import com.kenshoo.play.metrics.Metrics
 import config.AppConfig
 import models.MessageRecipient
-
 import javax.inject.Inject
+import metrics.HasMetrics
+import metrics.MetricsKeys.Connectors.RouteToArrivals
 import play.api.mvc.Headers
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 
@@ -28,14 +30,15 @@ import scala.xml.NodeSeq
 
 class DestinationConnector @Inject()(
   val config: AppConfig,
-  val http: HttpClient
-)(implicit ec: ExecutionContext) {
+  val http: HttpClient,
+  val metrics: Metrics
+)(implicit ec: ExecutionContext) extends HasMetrics {
 
   def sendMessage(
                    xMessageRecipient: MessageRecipient,
                    requestData: NodeSeq,
                    headers: Headers
-  )(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+  )(implicit hc: HeaderCarrier): Future[HttpResponse] = withMetricsTimerResponse(RouteToArrivals){
 
     val serviceUrl =
       s"${config.traderAtDestinationUrl.baseUrl}/movements/arrivals/${xMessageRecipient.headerValue}/messages/eis"

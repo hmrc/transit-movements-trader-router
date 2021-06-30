@@ -21,18 +21,19 @@ import connectors.DepartureConnector
 import helper.WireMockServerHandler
 import models.MessageRecipient
 import org.scalacheck.Gen
-import org.scalatest.{FreeSpec, MustMatchers}
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
-import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.http.Status.OK
 import play.api.mvc.Headers
 import uk.gov.hmrc.http.HeaderCarrier
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
 import scala.xml.Elem
 
-class DepartureConnectorSpec extends FreeSpec
-  with MustMatchers
+class DepartureConnectorSpec extends AnyFreeSpec
+  with Matchers
   with ScalaFutures
   with IntegrationPatience
   with WireMockServerHandler

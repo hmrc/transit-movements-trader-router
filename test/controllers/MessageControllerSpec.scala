@@ -17,8 +17,8 @@
 package controllers
 
 import base.SpecBase
-import org.mockito.Matchers.any
 import org.mockito.Mockito.{reset, when}
+import org.mockito.ArgumentMatchers._
 import org.scalatest.BeforeAndAfterEach
 import play.api.inject.bind
 import play.api.test.FakeRequest

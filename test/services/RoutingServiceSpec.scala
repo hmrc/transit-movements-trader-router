@@ -21,7 +21,7 @@ import connectors.{DepartureConnector, DestinationConnector}
 import models.MessageType.XMLSubmissionNegativeAcknowledgement
 import models.{Directable, MessageRecipient, MessageType}
 import org.scalatest.BeforeAndAfterEach
-import org.mockito.Matchers.any
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalacheck.Gen
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks

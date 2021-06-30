@@ -16,15 +16,17 @@
 
 package base
 
-import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.OptionValues
+import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.Configuration
 import play.api.inject.guice.GuiceApplicationBuilder
 import uk.gov.hmrc.http.HeaderCarrier
 
 trait SpecBase
-    extends FreeSpec
-    with MustMatchers
+    extends AnyFreeSpec
+    with Matchers
     with MockitoSugar
     with OptionValues {
 
@@ -32,5 +34,5 @@ trait SpecBase
 
   protected def applicationBuilder: GuiceApplicationBuilder =
     new GuiceApplicationBuilder()
-      .configure(Configuration("metrics.enabled" -> "false"))
+      .configure(Configuration("metrics.jvm" -> "false"))
 }
