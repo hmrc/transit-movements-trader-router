@@ -17,7 +17,7 @@
 package models
 
 import base.SpecBase
-import org.scalatest.Matchers.convertToAnyShouldWrapper
+import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
 class MessageRecipientSpec extends SpecBase with ScalaCheckDrivenPropertyChecks {

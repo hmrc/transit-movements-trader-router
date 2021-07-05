@@ -16,6 +16,8 @@
 
 package models
 
+import scala.xml.NodeSeq
+
 trait MessageType extends IeMetadata {
   def code: String
   def rootNode: String
@@ -58,4 +60,7 @@ object MessageType extends Enumerable.Implicits {
 
   implicit val enumerable: Enumerable[MessageType] =
     Enumerable(allMessages.map(v => v.code -> v): _*)
+
+  def getMessageType(nodeSeq: NodeSeq): Option[MessageType] =
+    nodeSeq.headOption.flatMap(head => allMessages.find(x => x.rootNode == head.label))
 }
