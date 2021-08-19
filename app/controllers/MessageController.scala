@@ -27,12 +27,11 @@ import play.api.mvc.Action
 import play.api.mvc.ControllerComponents
 import services.RoutingService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
-import utils.ResponseHelper
-
 import scala.concurrent.ExecutionContext
 import scala.xml.NodeSeq
 import metrics.MetricsKeys.Endpoints._
 import models.ArrivalMessage
+import uk.gov.hmrc.http.HttpErrorFunctions
 
 class MessageController @Inject() (
   messageRecipientIdentifier: MessageRecipientIdentifierActionProvider,
@@ -43,7 +42,7 @@ class MessageController @Inject() (
   val metrics: Metrics
 )(implicit val ec: ExecutionContext)
     extends BackendController(cc)
-    with ResponseHelper
+    with HttpErrorFunctions
     with Logging
     with HasActionMetrics {
 
@@ -65,8 +64,13 @@ class MessageController @Inject() (
                         Status(response.status)
                     }
                   case 404 if (request.directable.isInstanceOf[ArrivalMessage]) => Ok
-                  case _ =>
-                    handleNon2xx(response)
+                  case 400 if response.body != null =>
+                    logger.warn(s"Incoming Router Rejected: Downstream service rejected with following message: ${response.body}")
+                    BadRequest(response.body)
+                  case 400 =>
+                    logger.warn("Incoming Router Rejected: Downstream service rejected with no message")
+                    BadRequest
+                  case _ => Status(response.status)
                 }
             }
       }

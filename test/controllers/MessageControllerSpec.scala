@@ -116,7 +116,8 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
       contentAsString(result) mustBe "BadRequest: missing header key X-Message-Type"
     }
 
-    "return a Bad Request when upstream returns a Bad Request" in {
+    // 2
+    "return a Bad Request when upstream returns a Bad Request without response body" in {
       when(mockRoutingService.sendMessage(any(), any(), any(), any())(any()))
         .thenReturn(Future.successful(HttpResponse(BAD_REQUEST, null)))
 
@@ -134,7 +135,8 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
       status(result) mustBe BAD_REQUEST
     }
 
-    "return a Bad Request with response body when upstream returns a Bad Request with response body" in {
+    // 1
+    "return a Bad Request with upstream response body when upstream returns a Bad Request with response body" in {
       when(mockRoutingService.sendMessage(any(), any(), any(), any())(any()))
         .thenReturn(Future.successful(HttpResponse(BAD_REQUEST, "message")))
 
@@ -153,7 +155,27 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
       contentAsString(result).endsWith("message") mustBe true
     }
 
-    "return a Not Found when upstream returns a Not Found and message is a DepartureMessage" in {
+
+    "return a Not Found when upstream returns a Not Found with response body and message is a DepartureMessage" in {
+      when(mockRoutingService.sendMessage(any(), any(), any(), any())(any()))
+        .thenReturn(Future.successful(HttpResponse(NOT_FOUND, "foo")))
+
+      val request =
+        FakeRequest("POST", routes.MessageController.handleMessage().url)
+          .withHeaders(
+            "X-Message-Recipient" -> xMessageRecipient,
+            "X-Message-Type"      -> "IE928",
+            "Content-Type"        -> "application/xml"
+          )
+          .withXmlBody(<xml>test</xml>)
+
+      val result = route(application, request).value
+
+      status(result) mustBe NOT_FOUND
+      contentAsString(result) mustBe empty
+    }
+
+    "return a Not Found when upstream returns a Not Found without response body and message is a DepartureMessage" in {
       when(mockRoutingService.sendMessage(any(), any(), any(), any())(any()))
         .thenReturn(Future.successful(HttpResponse(NOT_FOUND, null)))
 
