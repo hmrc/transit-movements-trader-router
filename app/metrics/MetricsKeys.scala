@@ -27,7 +27,7 @@ object MetricsKeys {
   }
 
   object Endpoints {
-    val HandleMessage    = "incoming-router-handle-message"
+    val HandleMessage = "incoming-router-handle-message"
   }
 
   object Connectors {

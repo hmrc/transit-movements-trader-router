@@ -19,16 +19,19 @@ package utils.analysis
 import java.nio.charset.StandardCharsets
 
 import com.kenshoo.play.metrics.Metrics
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
+import javax.inject.Singleton
 import metrics.HasMetrics
 import metrics.MetricsKeys.Messages._
 import models.MessageType
-import models.MessageType.{NoReleaseForTransit, ReleaseForTransit, UnloadingPermission}
+import models.MessageType.NoReleaseForTransit
+import models.MessageType.ReleaseForTransit
+import models.MessageType.UnloadingPermission
 
 import scala.xml.NodeSeq
 
 @Singleton
-class MessageAnalyser @Inject()(val metrics: Metrics) extends HasMetrics {
+class MessageAnalyser @Inject() (val metrics: Metrics) extends HasMetrics {
   lazy val messageSize             = histo(MessageSize)
   lazy val numberOfGoods           = histo(NumberOfGoods)
   lazy val numberOfDocuments       = histo(NumberOfDocuments)

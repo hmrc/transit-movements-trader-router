@@ -25,10 +25,10 @@ case class ArrivalRecipient(headerValue: String) extends MessageRecipient
 case class DepartureRecipient(headerValue: String) extends MessageRecipient
 
 object MessageRecipient {
-  def apply(headerValue: String): MessageRecipient = {
+
+  def apply(headerValue: String): MessageRecipient =
     if (headerValue matches "(?i)MDTP-DEP-.*")
       DepartureRecipient(headerValue)
     else
       ArrivalRecipient(headerValue)
-  }
 }

@@ -24,11 +24,7 @@ import play.api.Configuration
 import play.api.inject.guice.GuiceApplicationBuilder
 import uk.gov.hmrc.http.HeaderCarrier
 
-trait SpecBase
-    extends AnyFreeSpec
-    with Matchers
-    with MockitoSugar
-    with OptionValues {
+trait SpecBase extends AnyFreeSpec with Matchers with MockitoSugar with OptionValues {
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 

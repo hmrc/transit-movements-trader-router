@@ -27,9 +27,9 @@ import play.api.test.Helpers._
 
 import scala.concurrent.Future
 
-class ResponseHelperSpec extends SpecBase with BeforeAndAfterEach with ScalaCheckPropertyChecks{
+class ResponseHelperSpec extends SpecBase with BeforeAndAfterEach with ScalaCheckPropertyChecks {
 
-  class Harness extends ResponseHelper { }
+  class Harness extends ResponseHelper {}
 
   val clientErrorGenerator: Gen[Int] = Gen.oneOf(Seq(Status.UNAUTHORIZED, Status.FORBIDDEN, Status.NOT_FOUND))
   val serverErrorGenerator: Gen[Int] = Gen.oneOf(Seq(Status.INTERNAL_SERVER_ERROR, Status.NOT_IMPLEMENTED, Status.SERVICE_UNAVAILABLE, Status.GATEWAY_TIMEOUT))

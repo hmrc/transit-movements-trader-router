@@ -23,8 +23,12 @@ import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.mvc.{AbstractController, Action, AnyContent, DefaultActionBuilder}
-import play.api.test.{FakeRequest, Helpers}
+import play.api.mvc.AbstractController
+import play.api.mvc.Action
+import play.api.mvc.AnyContent
+import play.api.mvc.DefaultActionBuilder
+import play.api.test.FakeRequest
+import play.api.test.Helpers
 import play.api.test.Helpers._
 import utils.analysis.MessageAnalyser
 

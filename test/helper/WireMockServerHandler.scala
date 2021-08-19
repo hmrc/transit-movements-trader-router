@@ -23,7 +23,8 @@ import org.scalatest.Suite
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import play.api.Application
 import play.api.inject.Injector
-import play.api.inject.guice.{GuiceApplicationBuilder, GuiceableModule}
+import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.inject.guice.GuiceableModule
 
 trait WireMockServerHandler extends BeforeAndAfterAll with BeforeAndAfterEach {
   this: Suite =>

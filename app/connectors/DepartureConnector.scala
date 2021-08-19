@@ -22,30 +22,33 @@ import models.MessageRecipient
 import javax.inject.Inject
 import metrics.HasMetrics
 import play.api.mvc.Headers
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.HttpClient
+import uk.gov.hmrc.http.HttpResponse
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
+import scala.concurrent.Future
 import scala.xml.NodeSeq
 import metrics.MetricsKeys.Connectors._
 
-class DepartureConnector @Inject()(
-                                   config: AppConfig,
-                                   http: HttpClient,
-                                   val metrics: Metrics
-                                 )(implicit ec: ExecutionContext) extends HasMetrics {
+class DepartureConnector @Inject() (
+  config: AppConfig,
+  http: HttpClient,
+  val metrics: Metrics
+)(implicit ec: ExecutionContext)
+    extends HasMetrics {
 
   def sendMessage(
-                   messageRecipient: MessageRecipient,
-                   requestData: NodeSeq,
-                   headers: Headers
-                 )(implicit hc: HeaderCarrier): Future[HttpResponse] = withMetricsTimerResponse(RouteToDepartures){
+    messageRecipient: MessageRecipient,
+    requestData: NodeSeq,
+    headers: Headers
+  )(implicit hc: HeaderCarrier): Future[HttpResponse] = withMetricsTimerResponse(RouteToDepartures) {
 
     val serviceUrl =
       s"${config.traderAtDepartureUrl.baseUrl}/movements/departures/${messageRecipient.headerValue}/messages/eis"
 
     val header = headers.headers.filter(
-      header =>
-        header._1.equalsIgnoreCase ("X-Message-Recipient") || header._1.equalsIgnoreCase("X-Message-Type") || header._1.equalsIgnoreCase("Content-Type")
+      header => header._1.equalsIgnoreCase("X-Message-Recipient") || header._1.equalsIgnoreCase("X-Message-Type") || header._1.equalsIgnoreCase("Content-Type")
     )
 
     http.POSTString[HttpResponse](serviceUrl, requestData.toString, header)

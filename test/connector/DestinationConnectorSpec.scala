@@ -21,7 +21,8 @@ import connectors.DestinationConnector
 import helper.WireMockServerHandler
 import models.MessageRecipient
 import org.scalacheck.Gen
-import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
+import org.scalatest.concurrent.IntegrationPatience
+import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
@@ -33,20 +34,19 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.xml.Elem
 
 class DestinationConnectorSpec
-  extends AnyFreeSpec
+    extends AnyFreeSpec
     with Matchers
     with ScalaFutures
     with IntegrationPatience
     with WireMockServerHandler
     with ScalaCheckPropertyChecks
-    with MockitoSugar
-{
+    with MockitoSugar {
 
   private val startUrl =
     "transit-movements-trader-at-destination/movements/arrivals"
   val sampleXml: Elem = <xml>test</xml>
 
-  val xMessageRecipient = "MDTP-ARR-1-1"
+  val xMessageRecipient                  = "MDTP-ARR-1-1"
   val messageRecipient: MessageRecipient = MessageRecipient(xMessageRecipient)
 
   implicit val hc: HeaderCarrier =
@@ -74,18 +74,19 @@ class DestinationConnectorSpec
 
       val errorResponses: Gen[Int] = Gen.chooseNum(400, 599)
 
-      forAll(errorResponses) { errorResponse =>
-        server.stubFor(
-          post(urlEqualTo(s"/$startUrl/${messageRecipient.headerValue}/messages/eis"))
-            .willReturn(
-              aResponse()
-                .withStatus(errorResponse)
-            )
-        )
+      forAll(errorResponses) {
+        errorResponse =>
+          server.stubFor(
+            post(urlEqualTo(s"/$startUrl/${messageRecipient.headerValue}/messages/eis"))
+              .willReturn(
+                aResponse()
+                  .withStatus(errorResponse)
+              )
+          )
 
-        val result = connector.sendMessage(messageRecipient, sampleXml, Headers())
+          val result = connector.sendMessage(messageRecipient, sampleXml, Headers())
 
-        result.futureValue.status mustBe errorResponse
+          result.futureValue.status mustBe errorResponse
 
       }
     }
