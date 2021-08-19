@@ -32,6 +32,7 @@ import utils.ResponseHelper
 import scala.concurrent.ExecutionContext
 import scala.xml.NodeSeq
 import metrics.MetricsKeys.Endpoints._
+import models.ArrivalMessage
 
 class MessageController @Inject() (
   messageRecipientIdentifier: MessageRecipientIdentifierActionProvider,
@@ -63,6 +64,7 @@ class MessageController @Inject() (
                         logger.warn("No location header in downstream response")
                         Status(response.status)
                     }
+                  case 404 if (request.directable.isInstanceOf[ArrivalMessage]) => Ok
                   case _ =>
                     handleNon2xx(response)
                 }

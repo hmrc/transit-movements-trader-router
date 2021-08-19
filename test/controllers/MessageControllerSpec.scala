@@ -153,7 +153,7 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
       contentAsString(result).endsWith("message") mustBe true
     }
 
-    "return a Not Found when upstream returns a Not Found" in {
+    "return a Not Found when upstream returns a Not Found and message is a DepartureMessage" in {
       when(mockRoutingService.sendMessage(any(), any(), any(), any())(any()))
         .thenReturn(Future.successful(HttpResponse(NOT_FOUND, null)))
 
@@ -161,7 +161,7 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
         FakeRequest("POST", routes.MessageController.handleMessage().url)
           .withHeaders(
             "X-Message-Recipient" -> xMessageRecipient,
-            "X-Message-Type"      -> xMessageType,
+            "X-Message-Type"      -> "IE928",
             "Content-Type"        -> "application/xml"
           )
           .withXmlBody(<xml>test</xml>)
@@ -169,6 +169,25 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
       val result = route(application, request).value
 
       status(result) mustBe NOT_FOUND
+      contentAsString(result) mustBe empty
+    }
+
+    "return a Ok when upstream returns a Not Found and message is a ArrivalMessage" in {
+      when(mockRoutingService.sendMessage(any(), any(), any(), any())(any()))
+        .thenReturn(Future.successful(HttpResponse(NOT_FOUND, null)))
+
+      val request =
+        FakeRequest("POST", routes.MessageController.handleMessage().url)
+          .withHeaders(
+            "X-Message-Recipient" -> xMessageRecipient,
+            "X-Message-Type"      -> "IE043",
+            "Content-Type"        -> "application/xml"
+          )
+          .withXmlBody(<xml>test</xml>)
+
+      val result = route(application, request).value
+
+      status(result) mustBe OK
       contentAsString(result) mustBe empty
     }
 

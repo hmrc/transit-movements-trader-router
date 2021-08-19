@@ -23,6 +23,7 @@ import play.api.mvc.Results
 import uk.gov.hmrc.http.HttpErrorFunctions
 import uk.gov.hmrc.http.HttpResponse
 
+@deprecated("Move logic into the controller directly", "0.47.0")
 trait ResponseHelper extends Results with Status with HttpErrorFunctions with Logging {
 
   def handleNon2xx(response: HttpResponse): Result =
