@@ -17,8 +17,7 @@
 package models.requests
 
 import models.MessageRecipient
-import play.api.mvc.{Request, WrappedRequest}
+import play.api.mvc.Request
+import play.api.mvc.WrappedRequest
 
-case class MessageRecipientRequest[A](request: Request[A],
-                                      messageRecipient: MessageRecipient)
-  extends WrappedRequest[A](request)
+case class MessageRecipientRequest[A](request: Request[A], messageRecipient: MessageRecipient) extends WrappedRequest[A](request)

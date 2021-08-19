@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import uk.gov.hmrc.http.{HttpReads, HttpResponse}
+import uk.gov.hmrc.http.HttpReads
+import uk.gov.hmrc.http.HttpResponse
 
 package object connectors {
+
   implicit val noExceptionHttpReads: HttpReads[HttpResponse] =
     new HttpReads[HttpResponse] {
-      override def read(method: String,
-                        url: String,
-                        response: HttpResponse): HttpResponse = response
+      override def read(method: String, url: String, response: HttpResponse): HttpResponse = response
     }
 }

@@ -16,16 +16,22 @@
 
 package metrics
 
-import com.codahale.metrics.{Counter, Histogram, MetricRegistry, Timer}
+import com.codahale.metrics.Counter
+import com.codahale.metrics.Histogram
+import com.codahale.metrics.MetricRegistry
+import com.codahale.metrics.Timer
 import com.kenshoo.play.metrics.Metrics
 import org.mockito.Mockito
 import org.mockito.Mockito._
-import org.scalatest.{BeforeAndAfterAll, OptionValues}
+import org.scalatest.BeforeAndAfterAll
+import org.scalatest.OptionValues
 import org.scalatest.wordspec.AsyncWordSpecLike
 import org.scalatest.compatible.Assertion
 import org.scalatestplus.mockito.MockitoSugar
-import play.api.mvc.{AbstractController, Results}
-import play.api.test.{FakeRequest, Helpers}
+import play.api.mvc.AbstractController
+import play.api.mvc.Results
+import play.api.test.FakeRequest
+import play.api.test.Helpers
 import org.mockito.ArgumentMatchers._
 import org.scalatest.matchers.should.Matchers
 
@@ -90,12 +96,12 @@ class HasMetricsSpec extends AsyncWordSpecLike with Matchers with OptionValues w
 
     "histo" should {
       "call registry.histogram once" in withTestMetrics {
-        metrics => Future.successful
-        {
-          metrics.histo("example")
-          verify(metrics.registry, times(1)).histogram("example")
-          succeed
-        }
+        metrics =>
+          Future.successful {
+            metrics.histo("example")
+            verify(metrics.registry, times(1)).histogram("example")
+            succeed
+          }
       }
     }
 

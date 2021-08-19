@@ -17,11 +17,14 @@
 package controllers
 
 import com.kenshoo.play.metrics.Metrics
-import controllers.actions.{AnalyseMessageActionProvider, MessageRecipientIdentifierActionProvider, MessageTypeIdentifierActionProvider}
+import controllers.actions.AnalyseMessageActionProvider
+import controllers.actions.MessageRecipientIdentifierActionProvider
+import controllers.actions.MessageTypeIdentifierActionProvider
 import logging.Logging
 import javax.inject.Inject
 import metrics.HasActionMetrics
-import play.api.mvc.{Action, ControllerComponents}
+import play.api.mvc.Action
+import play.api.mvc.ControllerComponents
 import services.RoutingService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import utils.ResponseHelper
@@ -30,7 +33,7 @@ import scala.concurrent.ExecutionContext
 import scala.xml.NodeSeq
 import metrics.MetricsKeys.Endpoints._
 
-class MessageController @Inject()(
+class MessageController @Inject() (
   messageRecipientIdentifier: MessageRecipientIdentifierActionProvider,
   messageTypeIdentifier: MessageTypeIdentifierActionProvider,
   cc: ControllerComponents,
@@ -38,28 +41,32 @@ class MessageController @Inject()(
   analyseMessage: AnalyseMessageActionProvider,
   val metrics: Metrics
 )(implicit val ec: ExecutionContext)
-    extends BackendController(cc) with ResponseHelper with Logging with HasActionMetrics {
+    extends BackendController(cc)
+    with ResponseHelper
+    with Logging
+    with HasActionMetrics {
 
   def handleMessage(): Action[NodeSeq] =
     withMetricsTimerAction(HandleMessage) {
-      (messageRecipientIdentifier() andThen messageTypeIdentifier() andThen analyseMessage()).async(parse.xml) { implicit request =>
-        routingService
-          .sendMessage(request.messageRecipient, request.directable, request.body, request.headers)
-          .map {
-            response =>
-              response.status match {
-                case status if is2xx(status) =>
-                  response.header(LOCATION) match {
-                    case Some(value) =>
-                      Status(response.status).withHeaders(LOCATION -> value)
-                    case None =>
-                      logger.warn("No location header in downstream response")
-                      Status(response.status)
-                  }
-                case _ =>
-                  handleNon2xx(response)
-              }
-          }
+      (messageRecipientIdentifier() andThen messageTypeIdentifier() andThen analyseMessage()).async(parse.xml) {
+        implicit request =>
+          routingService
+            .sendMessage(request.messageRecipient, request.directable, request.body, request.headers)
+            .map {
+              response =>
+                response.status match {
+                  case status if is2xx(status) =>
+                    response.header(LOCATION) match {
+                      case Some(value) =>
+                        Status(response.status).withHeaders(LOCATION -> value)
+                      case None =>
+                        logger.warn("No location header in downstream response")
+                        Status(response.status)
+                    }
+                  case _ =>
+                    handleNon2xx(response)
+                }
+            }
       }
     }
 }

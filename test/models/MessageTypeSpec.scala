@@ -20,7 +20,11 @@ import base.SpecBase
 import models.MessageType._
 import org.scalacheck.Gen
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import play.api.libs.json.{JsError, JsNumber, JsString, JsSuccess, Json}
+import play.api.libs.json.JsError
+import play.api.libs.json.JsNumber
+import play.api.libs.json.JsString
+import play.api.libs.json.JsSuccess
+import play.api.libs.json.Json
 
 class MessageTypeSpec extends SpecBase with ScalaCheckDrivenPropertyChecks {
 

@@ -18,24 +18,25 @@ package controllers.actions
 
 import com.google.inject.Inject
 import logging.Logging
-import models.{MessageRecipient, requests}
+import models.MessageRecipient
+import models.requests
 import models.requests.MessageRecipientRequest
 import play.api.mvc.Results.BadRequest
 import play.api.mvc._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
+import scala.concurrent.Future
 
-class MessageRecipientIdentifierActionProvider @Inject()(
+class MessageRecipientIdentifierActionProvider @Inject() (
   buildDefault: DefaultActionBuilder
 )(implicit val ec: ExecutionContext) {
+
   def apply(): ActionBuilder[MessageRecipientRequest, AnyContent] =
     buildDefault andThen
       new MessageRecipientIdentifierAction(ec)
 }
 
-class MessageRecipientIdentifierAction(val executionContext: ExecutionContext)
-  extends ActionRefiner[Request, MessageRecipientRequest]
-    with Logging {
+class MessageRecipientIdentifierAction(val executionContext: ExecutionContext) extends ActionRefiner[Request, MessageRecipientRequest] with Logging {
 
   override protected def refine[A](
     request: Request[A]
@@ -48,6 +49,8 @@ class MessageRecipientIdentifierAction(val executionContext: ExecutionContext)
           BadRequest
         }
         .right
-        .map(x => requests.MessageRecipientRequest(request, MessageRecipient(x)))
+        .map(
+          x => requests.MessageRecipientRequest(request, MessageRecipient(x))
+        )
     }
 }

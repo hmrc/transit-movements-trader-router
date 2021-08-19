@@ -17,9 +17,8 @@
 package utils
 
 object HttpHeaders {
-  val X_REQUEST_ID = "X-Request-ID"
-  val X_CORRELATION_ID = "X-Correlation-ID"
-  val X_MESSAGE_TYPE = "X-Message-Type"
+  val X_REQUEST_ID        = "X-Request-ID"
+  val X_CORRELATION_ID    = "X-Correlation-ID"
+  val X_MESSAGE_TYPE      = "X-Message-Type"
   val X_MESSAGE_RECIPIENT = "X-Message-Recipient"
 }
-

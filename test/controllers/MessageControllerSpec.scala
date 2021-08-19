@@ -17,7 +17,8 @@
 package controllers
 
 import base.SpecBase
-import org.mockito.Mockito.{reset, when}
+import org.mockito.Mockito.reset
+import org.mockito.Mockito.when
 import org.mockito.ArgumentMatchers._
 import org.scalatest.BeforeAndAfterEach
 import play.api.inject.bind
@@ -31,6 +32,7 @@ import scala.concurrent.Future
 class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
 
   private val mockRoutingService = mock[RoutingService]
+
   private val application = applicationBuilder
     .overrides(bind[RoutingService].toInstance(mockRoutingService))
     .build()
@@ -41,20 +43,19 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
   }
 
   private val xMessageRecipient = "MDTP-1-1"
-  private val xMessageType = "IE008"
+  private val xMessageType      = "IE008"
 
   "MessageController must" - {
     "return Ok when X-Message-Recipient and X-Message-Type are defined and there is an Ok with Location header from downstream response" in {
       when(mockRoutingService.sendMessage(any(), any(), any(), any())(any()))
-        .thenReturn(Future.successful(
-          HttpResponse(OK, body = null, Map(LOCATION -> Seq("/movements/arrivals/1/messages/1")))))
+        .thenReturn(Future.successful(HttpResponse(OK, body = null, Map(LOCATION -> Seq("/movements/arrivals/1/messages/1")))))
 
       val request =
         FakeRequest("POST", routes.MessageController.handleMessage().url)
           .withHeaders(
             "X-Message-Recipient" -> xMessageRecipient,
-            "X-Message-Type" -> xMessageType,
-            "Content-Type" -> "application/xml"
+            "X-Message-Type"      -> xMessageType,
+            "Content-Type"        -> "application/xml"
           )
           .withXmlBody(<xml>test</xml>)
 
@@ -67,15 +68,14 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
 
     "return Ok when X-Message-Recipient and X-Message-Type are defined and there is an Ok with no Location header from downstream response" in {
       when(mockRoutingService.sendMessage(any(), any(), any(), any())(any()))
-        .thenReturn(Future.successful(
-          HttpResponse(OK, null)))
+        .thenReturn(Future.successful(HttpResponse(OK, null)))
 
       val request =
         FakeRequest("POST", routes.MessageController.handleMessage().url)
           .withHeaders(
             "X-Message-Recipient" -> xMessageRecipient,
-            "X-Message-Type" -> xMessageType,
-            "Content-Type" -> "application/xml"
+            "X-Message-Type"      -> xMessageType,
+            "Content-Type"        -> "application/xml"
           )
           .withXmlBody(<xml>test</xml>)
 
@@ -92,8 +92,7 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
 
       val request =
         FakeRequest("POST", routes.MessageController.handleMessage().url)
-          .withHeaders("Content-Type" -> "application/xml",
-            "X-Message-Type" -> xMessageType)
+          .withHeaders("Content-Type" -> "application/xml", "X-Message-Type" -> xMessageType)
           .withXmlBody(<xml>test</xml>)
 
       val result = route(application, request).value
@@ -108,8 +107,7 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
 
       val request =
         FakeRequest("POST", routes.MessageController.handleMessage().url)
-          .withHeaders("Content-Type" -> "application/xml",
-            "X-Message-Recipient" -> xMessageRecipient)
+          .withHeaders("Content-Type" -> "application/xml", "X-Message-Recipient" -> xMessageRecipient)
           .withXmlBody(<xml>test</xml>)
 
       val result = route(application, request).value
@@ -126,8 +124,8 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
         FakeRequest("POST", routes.MessageController.handleMessage().url)
           .withHeaders(
             "X-Message-Recipient" -> xMessageRecipient,
-            "X-Message-Type" -> xMessageType,
-            "Content-Type" -> "application/xml"
+            "X-Message-Type"      -> xMessageType,
+            "Content-Type"        -> "application/xml"
           )
           .withXmlBody(<xml>test</xml>)
 
@@ -144,8 +142,8 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
         FakeRequest("POST", routes.MessageController.handleMessage().url)
           .withHeaders(
             "X-Message-Recipient" -> xMessageRecipient,
-            "X-Message-Type" -> xMessageType,
-            "Content-Type" -> "application/xml"
+            "X-Message-Type"      -> xMessageType,
+            "Content-Type"        -> "application/xml"
           )
           .withXmlBody(<xml>test</xml>)
 
@@ -163,8 +161,8 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
         FakeRequest("POST", routes.MessageController.handleMessage().url)
           .withHeaders(
             "X-Message-Recipient" -> xMessageRecipient,
-            "X-Message-Type" -> xMessageType,
-            "Content-Type" -> "application/xml"
+            "X-Message-Type"      -> xMessageType,
+            "Content-Type"        -> "application/xml"
           )
           .withXmlBody(<xml>test</xml>)
 
@@ -182,8 +180,8 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
         FakeRequest("POST", routes.MessageController.handleMessage().url)
           .withHeaders(
             "X-Message-Recipient" -> xMessageRecipient,
-            "X-Message-Type" -> xMessageType,
-            "Content-Type" -> "application/xml"
+            "X-Message-Type"      -> xMessageType,
+            "Content-Type"        -> "application/xml"
           )
           .withXmlBody(<xml>test</xml>)
 
@@ -201,8 +199,8 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
         FakeRequest("POST", routes.MessageController.handleMessage().url)
           .withHeaders(
             "X-Message-Recipient" -> xMessageRecipient,
-            "X-Message-Type" -> xMessageType,
-            "Content-Type" -> "application/xml"
+            "X-Message-Type"      -> xMessageType,
+            "Content-Type"        -> "application/xml"
           )
           .withXmlBody(<xml>test</xml>)
 

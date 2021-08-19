@@ -28,8 +28,9 @@ class MessageRecipientIdentifierActionSpec extends SpecBase {
 
   class Harness(action: MessageRecipientIdentifierActionProvider) {
 
-    def run(): Action[AnyContent] = action() { result =>
-      Results.Ok("")
+    def run(): Action[AnyContent] = action() {
+      result =>
+        Results.Ok("")
     }
   }
 

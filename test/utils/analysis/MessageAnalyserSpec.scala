@@ -37,10 +37,10 @@ class MessageAnalyserSpec extends AnyFreeSpec with Matchers with MockitoSugar wi
     override lazy val numberOfSeals: Histogram           = mock[Histogram]
   }
 
-  private val trackedXmlMovements = Seq(CC051B, CC043A, CC029B)
+  private val trackedXmlMovements   = Seq(CC051B, CC043A, CC029B)
   private val untrackedXmlMovements = Seq(CC060A, CC009A)
 
-  def resetMocks() = reset(analyser.messageSize, analyser.numberOfGoods, analyser.numberOfDocuments, analyser.numberOfSpecialMentions, analyser.numberOfSeals)
+  def resetMocks()                          = reset(analyser.messageSize, analyser.numberOfGoods, analyser.numberOfDocuments, analyser.numberOfSpecialMentions, analyser.numberOfSeals)
   override protected def beforeEach(): Unit = resetMocks()
 
   "MessageAnalyser" - {

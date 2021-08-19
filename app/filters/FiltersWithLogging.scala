@@ -23,4 +23,4 @@ import uk.gov.hmrc.play.bootstrap.backend.filters.BackendFilters
 class FiltersWithLogging @Inject() (
   backendFilters: BackendFilters,
   loggingFilter: LoggingFilter
-) extends DefaultHttpFilters(Seq(loggingFilter) ++ backendFilters.filters : _*)
+) extends DefaultHttpFilters(Seq(loggingFilter) ++ backendFilters.filters: _*)

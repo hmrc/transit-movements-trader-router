@@ -16,9 +16,10 @@
 
 package models.requests
 
-import models.{Directable, MessageRecipient}
+import models.Directable
+import models.MessageRecipient
 import play.api.mvc.WrappedRequest
 
-case class RoutableRequest[A](request: MessageRecipientRequest[A], directable: Directable) extends WrappedRequest[A](request){
-  def messageRecipient:MessageRecipient = request.messageRecipient
+case class RoutableRequest[A](request: MessageRecipientRequest[A], directable: Directable) extends WrappedRequest[A](request) {
+  def messageRecipient: MessageRecipient = request.messageRecipient
 }

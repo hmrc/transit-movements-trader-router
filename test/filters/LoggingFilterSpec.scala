@@ -22,14 +22,17 @@ import base.SpecBase
 import controllers.Assets.Ok
 import org.scalatest.concurrent.ScalaFutures
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.mvc.{Action, AnyContent, DefaultActionBuilder, RequestHeader}
+import play.api.mvc.Action
+import play.api.mvc.AnyContent
+import play.api.mvc.DefaultActionBuilder
+import play.api.mvc.RequestHeader
 import play.api.test.FakeRequest
 import play.api.test.Helpers.running
 
 class LoggingFilterSpec extends SpecBase with ScalaFutures {
 
-  private implicit val system: ActorSystem    = ActorSystem("LoggingFilterSpec")
-  private implicit val mat: ActorMaterializer = ActorMaterializer()
+  implicit private val system: ActorSystem    = ActorSystem("LoggingFilterSpec")
+  implicit private val mat: ActorMaterializer = ActorMaterializer()
 
   "LoggingFilter" - {
 
@@ -43,7 +46,9 @@ class LoggingFilterSpec extends SpecBase with ScalaFutures {
         val builder = app.injector.instanceOf[DefaultActionBuilder]
 
         val rh: RequestHeader = FakeRequest("GET", "")
-        val nextAction: Action[AnyContent] = builder.apply(_ => Ok("yay"))
+        val nextAction: Action[AnyContent] = builder.apply(
+          _ => Ok("yay")
+        )
 
         val result = filter.apply(nextAction)(rh).run.futureValue
 

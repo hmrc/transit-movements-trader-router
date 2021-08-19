@@ -16,12 +16,15 @@
 
 package connector
 
-import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, post, urlEqualTo}
+import com.github.tomakehurst.wiremock.client.WireMock.aResponse
+import com.github.tomakehurst.wiremock.client.WireMock.post
+import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import connectors.DepartureConnector
 import helper.WireMockServerHandler
 import models.MessageRecipient
 import org.scalacheck.Gen
-import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
+import org.scalatest.concurrent.IntegrationPatience
+import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
@@ -32,18 +35,18 @@ import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
 import scala.xml.Elem
 
-class DepartureConnectorSpec extends AnyFreeSpec
-  with Matchers
-  with ScalaFutures
-  with IntegrationPatience
-  with WireMockServerHandler
-  with ScalaCheckPropertyChecks
-  with MockitoSugar
-   {
+class DepartureConnectorSpec
+    extends AnyFreeSpec
+    with Matchers
+    with ScalaFutures
+    with IntegrationPatience
+    with WireMockServerHandler
+    with ScalaCheckPropertyChecks
+    with MockitoSugar {
 
   private val startUrl =
     "transits-movements-trader-at-departure/movements/departures"
-  val sampleXml: Elem = <xml>test</xml>
+  val sampleXml: Elem  = <xml>test</xml>
   val messageRecipient = MessageRecipient("MDTP-DEP-1-1")
 
   implicit val hc: HeaderCarrier =
@@ -71,18 +74,19 @@ class DepartureConnectorSpec extends AnyFreeSpec
 
       val errorResponses: Gen[Int] = Gen.chooseNum(400, 599)
 
-      forAll(errorResponses) { errorResponse =>
-        server.stubFor(
-          post(urlEqualTo(s"/$startUrl/${messageRecipient.headerValue}/messages/eis"))
-            .willReturn(
-              aResponse()
-                .withStatus(errorResponse)
-            )
-        )
+      forAll(errorResponses) {
+        errorResponse =>
+          server.stubFor(
+            post(urlEqualTo(s"/$startUrl/${messageRecipient.headerValue}/messages/eis"))
+              .willReturn(
+                aResponse()
+                  .withStatus(errorResponse)
+              )
+          )
 
-        val result = connector.sendMessage(messageRecipient, sampleXml, Headers())
+          val result = connector.sendMessage(messageRecipient, sampleXml, Headers())
 
-        result.futureValue.status mustBe errorResponse
+          result.futureValue.status mustBe errorResponse
 
       }
     }

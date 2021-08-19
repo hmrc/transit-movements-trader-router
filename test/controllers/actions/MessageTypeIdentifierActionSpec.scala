@@ -17,8 +17,11 @@
 package controllers.actions
 
 import base.SpecBase
-import models.{Directable, MessageRecipient, MessageType}
-import models.requests.{MessageRecipientRequest, RoutableRequest}
+import models.Directable
+import models.MessageRecipient
+import models.MessageType
+import models.requests.MessageRecipientRequest
+import models.requests.RoutableRequest
 import org.scalacheck.Gen
 import org.scalatest.EitherValues
 import org.scalatest.concurrent.ScalaFutures
@@ -35,13 +38,12 @@ class MessageTypeIdentifierActionSpec extends SpecBase with ScalaFutures with Ei
   private val genXMessageType: Gen[Directable] = Gen.oneOf(MessageType.validMessages)
 
   class Harness extends MessageTypeIdentifierAction(global) {
-    def run[A](request: MessageRecipientRequest[A]): Future[Either[Result, RoutableRequest[A]]]
-      = refine(request)
+    def run[A](request: MessageRecipientRequest[A]): Future[Either[Result, RoutableRequest[A]]] = refine(request)
   }
 
   "MessageTypeIdentifierAction" - {
     "must return an BadRequest when the X-Message-Type is missing" in {
-      def fakeRequest = MessageRecipientRequest(FakeRequest("",""), MessageRecipient("MDTP-1-1"))
+      def fakeRequest = MessageRecipientRequest(FakeRequest("", ""), MessageRecipient("MDTP-1-1"))
 
       val harness = new Harness
 
@@ -57,25 +59,31 @@ class MessageTypeIdentifierActionSpec extends SpecBase with ScalaFutures with Ei
     "will process the action when the X-Message-Type is present" in {
       forAll(genXMessageType) {
         xMessageType =>
-        def fakeRequest = MessageRecipientRequest(FakeRequest("", "").withHeaders(
-          "X-Message-Type" -> xMessageType.code
-        ), MessageRecipient("MDTP-1-1"))
+          def fakeRequest = MessageRecipientRequest(
+            FakeRequest("", "").withHeaders(
+              "X-Message-Type" -> xMessageType.code
+            ),
+            MessageRecipient("MDTP-1-1")
+          )
 
-        val action: Harness = new Harness()
+          val action: Harness = new Harness()
 
-        val result = action.run(fakeRequest)
+          val result = action.run(fakeRequest)
 
-        whenReady(result) {
-          r =>
-            r.isRight mustBe true
-        }
+          whenReady(result) {
+            r =>
+              r.isRight mustBe true
+          }
       }
     }
 
     "will respond with NotImplemented when the X-Message-Type is not supported" in {
-      def fakeRequest = MessageRecipientRequest(FakeRequest("","").withHeaders(
-        "X-Message-Type" -> "IE971"
-      ), MessageRecipient("MDTP-1-1"))
+      def fakeRequest = MessageRecipientRequest(
+        FakeRequest("", "").withHeaders(
+          "X-Message-Type" -> "IE971"
+        ),
+        MessageRecipient("MDTP-1-1")
+      )
 
       val action: Harness = new Harness()
 

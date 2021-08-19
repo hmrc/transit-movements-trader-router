@@ -25,15 +25,15 @@ class MessageRecipientSpec extends SpecBase with ScalaCheckDrivenPropertyChecks 
   "MessageRecipient must be" - {
     "DepartureRecipient" in {
       val messageRecipient = MessageRecipient("MDTP-DEP-1-1")
-      messageRecipient shouldBe a [DepartureRecipient]
+      messageRecipient shouldBe a[DepartureRecipient]
     }
     "ArrivalRecipient" in {
       val messageRecipient = MessageRecipient("MDTP-ARR-1-1")
-      messageRecipient shouldBe an [ArrivalRecipient]
+      messageRecipient shouldBe an[ArrivalRecipient]
     }
     "ArrivalRecipient as default" in {
       val messageRecipient = MessageRecipient("MDTP-1-1")
-      messageRecipient shouldBe an [ArrivalRecipient]
+      messageRecipient shouldBe an[ArrivalRecipient]
     }
   }
 }
