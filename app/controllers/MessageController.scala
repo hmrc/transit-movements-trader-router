@@ -63,7 +63,7 @@ class MessageController @Inject() (
                         logger.warn("No location header in downstream response")
                         Status(response.status)
                     }
-                  case 404 if (request.directable.isInstanceOf[ArrivalMessage]) => Ok
+                  case 404 => Ok
                   case 400 if response.body != null =>
                     logger.warn(s"Incoming Router Rejected: Downstream service rejected with following message: ${response.body}")
                     BadRequest(response.body)

@@ -116,7 +116,6 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
       contentAsString(result) mustBe "BadRequest: missing header key X-Message-Type"
     }
 
-    // 2
     "return a Bad Request when upstream returns a Bad Request without response body" in {
       when(mockRoutingService.sendMessage(any(), any(), any(), any())(any()))
         .thenReturn(Future.successful(HttpResponse(BAD_REQUEST, null)))
@@ -135,7 +134,6 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
       status(result) mustBe BAD_REQUEST
     }
 
-    // 1
     "return a Bad Request with upstream response body when upstream returns a Bad Request with response body" in {
       when(mockRoutingService.sendMessage(any(), any(), any(), any())(any()))
         .thenReturn(Future.successful(HttpResponse(BAD_REQUEST, "message")))
@@ -155,8 +153,7 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
       contentAsString(result).endsWith("message") mustBe true
     }
 
-
-    "return a Not Found when upstream returns a Not Found with response body and message is a DepartureMessage" in {
+    "return a Ok when upstream returns a Not Found with response body and message is a DepartureMessage" in {
       when(mockRoutingService.sendMessage(any(), any(), any(), any())(any()))
         .thenReturn(Future.successful(HttpResponse(NOT_FOUND, "foo")))
 
@@ -171,11 +168,11 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
 
       val result = route(application, request).value
 
-      status(result) mustBe NOT_FOUND
+      status(result) mustBe OK
       contentAsString(result) mustBe empty
     }
 
-    "return a Not Found when upstream returns a Not Found without response body and message is a DepartureMessage" in {
+    "return a Ok when upstream returns a Not Found without response body and message is a DepartureMessage" in {
       when(mockRoutingService.sendMessage(any(), any(), any(), any())(any()))
         .thenReturn(Future.successful(HttpResponse(NOT_FOUND, null)))
 
@@ -190,7 +187,7 @@ class MessageControllerSpec extends SpecBase with BeforeAndAfterEach {
 
       val result = route(application, request).value
 
-      status(result) mustBe NOT_FOUND
+      status(result) mustBe OK
       contentAsString(result) mustBe empty
     }
 
