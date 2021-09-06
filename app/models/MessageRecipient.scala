@@ -24,11 +24,20 @@ case class ArrivalRecipient(headerValue: String) extends MessageRecipient
 
 case class DepartureRecipient(headerValue: String) extends MessageRecipient
 
+case class GuaranteeRecipient(headerValue: String) extends MessageRecipient
+
 object MessageRecipient {
 
-  def apply(headerValue: String): MessageRecipient =
-    if (headerValue matches "(?i)MDTP-DEP-.*")
-      DepartureRecipient(headerValue)
+  def fromHeaderValue(headerValue: String): Option[MessageRecipient] = {
+    val headerPrefix = headerValue.take(9)
+
+    if (headerPrefix.equalsIgnoreCase("MDTP-DEP-"))
+      Some(DepartureRecipient(headerValue))
+    else if (headerPrefix.equalsIgnoreCase("MDTP-ARR-"))
+      Some(ArrivalRecipient(headerValue))
+    else if (headerPrefix.equalsIgnoreCase("MDTP-GUA-"))
+      Some(GuaranteeRecipient(headerValue))
     else
-      ArrivalRecipient(headerValue)
+      None
+  }
 }

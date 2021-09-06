@@ -16,9 +16,7 @@
 
 package connector
 
-import com.github.tomakehurst.wiremock.client.WireMock.aResponse
-import com.github.tomakehurst.wiremock.client.WireMock.post
-import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
+import com.github.tomakehurst.wiremock.client.WireMock._
 import connectors.DepartureConnector
 import helper.WireMockServerHandler
 import models.MessageRecipient
@@ -28,10 +26,11 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
-import play.api.http.Status.OK
-import play.api.mvc.Headers
-import uk.gov.hmrc.http.HeaderCarrier
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
+import play.api.http.HeaderNames
+import play.api.http.MimeTypes
+import play.api.http.Status.OK
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.xml.Elem
 
@@ -46,11 +45,18 @@ class DepartureConnectorSpec
 
   private val startUrl =
     "transits-movements-trader-at-departure/movements/departures"
-  val sampleXml: Elem  = <xml>test</xml>
-  val messageRecipient = MessageRecipient("MDTP-DEP-1-1")
+  val sampleXml: Elem   = <xml>test</xml>
+  val xMessageRecipient = "MDTP-DEP-1-1"
+  val messageRecipient  = MessageRecipient.fromHeaderValue(xMessageRecipient).get
 
   implicit val hc: HeaderCarrier =
-    HeaderCarrier().withExtraHeaders("X-Test-Header" -> "X-Test-Header-Value")
+    HeaderCarrier(otherHeaders =
+      Seq(
+        HeaderNames.CONTENT_TYPE -> MimeTypes.XML,
+        "X-Message-Recipient"    -> xMessageRecipient,
+        "X-Message-Type"         -> "IE028"
+      )
+    ).withExtraHeaders("X-Test-Header" -> "X-Test-Header-Value")
 
   lazy val connector: DepartureConnector =
     app.injector.instanceOf[DepartureConnector]
@@ -60,13 +66,16 @@ class DepartureConnectorSpec
 
       server.stubFor(
         post(urlEqualTo(s"/$startUrl/${messageRecipient.headerValue}/messages/eis"))
+          .withHeader("Content-Type", equalTo("application/xml"))
+          .withHeader("X-Message-Recipient", equalTo(xMessageRecipient))
+          .withHeader("X-Message-Type", equalTo("IE028"))
           .willReturn(
             aResponse()
               .withStatus(OK)
           )
       )
 
-      val result = connector.sendMessage(messageRecipient, sampleXml, Headers())
+      val result = connector.sendMessage(messageRecipient, sampleXml)
       result.futureValue.status mustBe OK
     }
 
@@ -84,7 +93,7 @@ class DepartureConnectorSpec
               )
           )
 
-          val result = connector.sendMessage(messageRecipient, sampleXml, Headers())
+          val result = connector.sendMessage(messageRecipient, sampleXml)
 
           result.futureValue.status mustBe errorResponse
 

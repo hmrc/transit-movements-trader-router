@@ -17,22 +17,22 @@
 package filters
 
 import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
+import akka.stream.Materializer
 import base.SpecBase
-import controllers.Assets.Ok
 import org.scalatest.concurrent.ScalaFutures
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.Action
 import play.api.mvc.AnyContent
 import play.api.mvc.DefaultActionBuilder
 import play.api.mvc.RequestHeader
+import play.api.mvc.Results
 import play.api.test.FakeRequest
 import play.api.test.Helpers.running
 
 class LoggingFilterSpec extends SpecBase with ScalaFutures {
 
-  implicit private val system: ActorSystem    = ActorSystem("LoggingFilterSpec")
-  implicit private val mat: ActorMaterializer = ActorMaterializer()
+  implicit private val system: ActorSystem = ActorSystem(suiteName)
+  implicit private val mat: Materializer   = Materializer(system)
 
   "LoggingFilter" - {
 
@@ -47,12 +47,12 @@ class LoggingFilterSpec extends SpecBase with ScalaFutures {
 
         val rh: RequestHeader = FakeRequest("GET", "")
         val nextAction: Action[AnyContent] = builder.apply(
-          _ => Ok("yay")
+          _ => Results.Ok("yay")
         )
 
         val result = filter.apply(nextAction)(rh).run.futureValue
 
-        result mustEqual Ok("yay")
+        result mustEqual Results.Ok("yay")
       }
     }
   }

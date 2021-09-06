@@ -17,10 +17,10 @@
 package helper
 
 import com.github.tomakehurst.wiremock.WireMockServer
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.Suite
-import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import play.api.Application
 import play.api.inject.Injector
 import play.api.inject.guice.GuiceApplicationBuilder

@@ -16,8 +16,8 @@
 
 package base
 
-import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.OptionValues
+import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.Configuration

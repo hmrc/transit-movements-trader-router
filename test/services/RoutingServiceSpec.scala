@@ -19,16 +19,15 @@ package services
 import base.SpecBase
 import connectors.DepartureConnector
 import connectors.DestinationConnector
-import models.MessageType.XMLSubmissionNegativeAcknowledgement
-import models.Directable
+import connectors.GuaranteeConnector
 import models.MessageRecipient
 import models.MessageType
-import org.scalatest.BeforeAndAfterEach
+import models.MessageType.XMLSubmissionNegativeAcknowledgement
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalacheck.Gen
+import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
-import play.api.mvc.Headers
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.HttpResponse
 
@@ -36,9 +35,9 @@ import scala.concurrent.Future
 
 class RoutingServiceSpec extends SpecBase with BeforeAndAfterEach with ScalaCheckPropertyChecks {
 
-  val destinationMessageTypes: Gen[Directable] = Gen.oneOf[Directable](MessageType.arrivalValues)
-
-  val departureMessageTypes: Gen[Directable] = Gen.oneOf[Directable](MessageType.departureValues)
+  val destinationMessageTypes: Gen[MessageType] = Gen.oneOf(MessageType.arrivalValues)
+  val departureMessageTypes: Gen[MessageType]   = Gen.oneOf(MessageType.departureValues)
+  val guaranteeMessageTypes: Gen[MessageType]   = Gen.oneOf(MessageType.guaranteeValues)
 
   "sendMessage must" - {
     "use DepartureConnector when forwarding a Departure Message" in {
@@ -47,83 +46,108 @@ class RoutingServiceSpec extends SpecBase with BeforeAndAfterEach with ScalaChec
         messageType =>
           val mockDepartureConnector   = mock[DepartureConnector]
           val mockDestinationConnector = mock[DestinationConnector]
+          val mockGuaranteeConnector   = mock[GuaranteeConnector]
+          val messageRecipient         = MessageRecipient.fromHeaderValue("MDTP-DEP-1-1").get
 
-          when(mockDepartureConnector.sendMessage(any(), any(), any())(any())).thenReturn(Future.successful(HttpResponse(200)))
+          when(mockDepartureConnector.sendMessage(any(), any())(any())).thenReturn(Future.successful(HttpResponse(200, "")))
 
-          val sut = new RoutingService(mockDestinationConnector, mockDepartureConnector)
+          val sut = new RoutingService(mockDestinationConnector, mockDepartureConnector, mockGuaranteeConnector)
 
-          sut.sendMessage(MessageRecipient("MDTP-1-1"), messageType, <Abc>123</Abc>, Headers())
+          sut.sendMessage(messageRecipient, messageType, <Abc>123</Abc>)
 
-          verify(mockDepartureConnector, times(1)).sendMessage(any(), any(), any())(any())
-          verify(mockDestinationConnector, times(0)).sendMessage(any(), any(), any())(any())
-
+          verify(mockDepartureConnector, times(1)).sendMessage(any(), any())(any())
+          verify(mockDestinationConnector, times(0)).sendMessage(any(), any())(any())
+          verify(mockGuaranteeConnector, times(0)).sendMessage(any(), any())(any())
       }
     }
 
     "use DestinationConnector when forwarding a Destination Message" in {
-
       forAll(destinationMessageTypes) {
         messageType =>
           val mockDepartureConnector   = mock[DepartureConnector]
           val mockDestinationConnector = mock[DestinationConnector]
+          val mockGuaranteeConnector   = mock[GuaranteeConnector]
+          val messageRecipient         = MessageRecipient.fromHeaderValue("MDTP-ARR-1-1").get
 
-          when(mockDestinationConnector.sendMessage(any(), any(), any())(any())).thenReturn(Future.successful(HttpResponse(200, "")))
-          val sut = new RoutingService(mockDestinationConnector, mockDepartureConnector)
+          when(mockDestinationConnector.sendMessage(any(), any())(any())).thenReturn(Future.successful(HttpResponse(200, "")))
+          val sut = new RoutingService(mockDestinationConnector, mockDepartureConnector, mockGuaranteeConnector)
 
-          sut.sendMessage(MessageRecipient("MDTP-1-1"), messageType, <Abc>123</Abc>, Headers())(HeaderCarrier())
+          sut.sendMessage(messageRecipient, messageType, <Abc>123</Abc>)(HeaderCarrier())
 
-          verify(mockDepartureConnector, times(0)).sendMessage(any(), any(), any())(any())
-          verify(mockDestinationConnector, times(1)).sendMessage(any(), any(), any())(any())
+          verify(mockDepartureConnector, times(0)).sendMessage(any(), any())(any())
+          verify(mockDestinationConnector, times(1)).sendMessage(any(), any())(any())
+          verify(mockGuaranteeConnector, times(0)).sendMessage(any(), any())(any())
+      }
+    }
 
+    "use GuaranteeConnector when forwarding a Guarantee Message" in {
+      forAll(guaranteeMessageTypes) {
+        messageType =>
+          val mockDepartureConnector   = mock[DepartureConnector]
+          val mockDestinationConnector = mock[DestinationConnector]
+          val mockGuaranteeConnector   = mock[GuaranteeConnector]
+          val messageRecipient         = MessageRecipient.fromHeaderValue("MDTP-GUA-1-1").get
+
+          when(mockDestinationConnector.sendMessage(any(), any())(any())).thenReturn(Future.successful(HttpResponse(200, "")))
+          val sut = new RoutingService(mockDestinationConnector, mockDepartureConnector, mockGuaranteeConnector)
+
+          sut.sendMessage(messageRecipient, messageType, <Abc>123</Abc>)(HeaderCarrier())
+
+          verify(mockDepartureConnector, times(0)).sendMessage(any(), any())(any())
+          verify(mockDestinationConnector, times(0)).sendMessage(any(), any())(any())
+          verify(mockGuaranteeConnector, times(1)).sendMessage(any(), any())(any())
       }
     }
 
     "use DepartureConnector when forwarding a 917 message with DEP header" in {
-
       val messageType              = XMLSubmissionNegativeAcknowledgement
       val mockDepartureConnector   = mock[DepartureConnector]
       val mockDestinationConnector = mock[DestinationConnector]
+      val mockGuaranteeConnector   = mock[GuaranteeConnector]
+      val messageRecipient         = MessageRecipient.fromHeaderValue("MDTP-DEP-1-1").get
 
-      when(mockDestinationConnector.sendMessage(any(), any(), any())(any())).thenReturn(Future.successful(HttpResponse(200, "")))
-      val sut = new RoutingService(mockDestinationConnector, mockDepartureConnector)
+      when(mockDestinationConnector.sendMessage(any(), any())(any())).thenReturn(Future.successful(HttpResponse(200, "")))
+      val sut = new RoutingService(mockDestinationConnector, mockDepartureConnector, mockGuaranteeConnector)
 
-      sut.sendMessage(MessageRecipient("MDTP-DEP-1-1"), messageType, <Abc>123</Abc>, Headers())(HeaderCarrier())
+      sut.sendMessage(messageRecipient, messageType, <Abc>123</Abc>)(HeaderCarrier())
 
-      verify(mockDepartureConnector, times(1)).sendMessage(any(), any(), any())(any())
-      verify(mockDestinationConnector, times(0)).sendMessage(any(), any(), any())(any())
-
+      verify(mockDepartureConnector, times(1)).sendMessage(any(), any())(any())
+      verify(mockDestinationConnector, times(0)).sendMessage(any(), any())(any())
+      verify(mockGuaranteeConnector, times(0)).sendMessage(any(), any())(any())
     }
 
     "use DestinationConnector when forwarding a 917 message with an ARR header" in {
-
       val messageType              = XMLSubmissionNegativeAcknowledgement
       val mockDepartureConnector   = mock[DepartureConnector]
       val mockDestinationConnector = mock[DestinationConnector]
+      val mockGuaranteeConnector   = mock[GuaranteeConnector]
+      val messageRecipient         = MessageRecipient.fromHeaderValue("MDTP-ARR-1-1").get
 
-      when(mockDestinationConnector.sendMessage(any(), any(), any())(any())).thenReturn(Future.successful(HttpResponse(200, "")))
-      val sut = new RoutingService(mockDestinationConnector, mockDepartureConnector)
+      when(mockDestinationConnector.sendMessage(any(), any())(any())).thenReturn(Future.successful(HttpResponse(200, "")))
+      val sut = new RoutingService(mockDestinationConnector, mockDepartureConnector, mockGuaranteeConnector)
 
-      sut.sendMessage(MessageRecipient("MDTP-ARR-1-1"), messageType, <Abc>123</Abc>, Headers())(HeaderCarrier())
+      sut.sendMessage(messageRecipient, messageType, <Abc>123</Abc>)(HeaderCarrier())
 
-      verify(mockDepartureConnector, times(0)).sendMessage(any(), any(), any())(any())
-      verify(mockDestinationConnector, times(1)).sendMessage(any(), any(), any())(any())
-
+      verify(mockDepartureConnector, times(0)).sendMessage(any(), any())(any())
+      verify(mockDestinationConnector, times(1)).sendMessage(any(), any())(any())
+      verify(mockGuaranteeConnector, times(0)).sendMessage(any(), any())(any())
     }
 
-    "use DestinationConnector when forwarding a 917 message without ARR or DEP in header" in {
-
+    "use GuaranteeConnector when forwarding a 917 message with a GUA header" in {
       val messageType              = XMLSubmissionNegativeAcknowledgement
       val mockDepartureConnector   = mock[DepartureConnector]
       val mockDestinationConnector = mock[DestinationConnector]
+      val mockGuaranteeConnector   = mock[GuaranteeConnector]
+      val messageRecipient         = MessageRecipient.fromHeaderValue("MDTP-GUA-1-1").get
 
-      when(mockDestinationConnector.sendMessage(any(), any(), any())(any())).thenReturn(Future.successful(HttpResponse(200, "")))
-      val sut = new RoutingService(mockDestinationConnector, mockDepartureConnector)
+      when(mockGuaranteeConnector.sendMessage(any(), any())(any())).thenReturn(Future.successful(HttpResponse(200, "")))
+      val sut = new RoutingService(mockDestinationConnector, mockDepartureConnector, mockGuaranteeConnector)
 
-      sut.sendMessage(MessageRecipient("MDTP-1-1"), messageType, <Abc>123</Abc>, Headers())(HeaderCarrier())
+      sut.sendMessage(messageRecipient, messageType, <Abc>123</Abc>)(HeaderCarrier())
 
-      verify(mockDepartureConnector, times(0)).sendMessage(any(), any(), any())(any())
-      verify(mockDestinationConnector, times(1)).sendMessage(any(), any(), any())(any())
-
+      verify(mockDepartureConnector, times(0)).sendMessage(any(), any())(any())
+      verify(mockDestinationConnector, times(0)).sendMessage(any(), any())(any())
+      verify(mockGuaranteeConnector, times(1)).sendMessage(any(), any())(any())
     }
   }
 }

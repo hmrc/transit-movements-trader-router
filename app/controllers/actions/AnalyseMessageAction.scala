@@ -16,14 +16,15 @@
 
 package controllers.actions
 
+import com.google.inject.ImplementedBy
+import play.api.mvc.ActionTransformer
+import play.api.mvc.Request
+import utils.analysis.MessageAnalyser
+
+import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
-import javax.inject.Inject
-import utils.analysis.MessageAnalyser
 import scala.xml.NodeSeq
-import play.api.mvc.Request
-import play.api.mvc.ActionTransformer
-import com.google.inject.ImplementedBy
 
 @ImplementedBy(classOf[AnalyseMessageActionProviderImpl])
 trait AnalyseMessageActionProvider {

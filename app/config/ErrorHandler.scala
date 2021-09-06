@@ -16,7 +16,6 @@
 
 package config
 
-import javax.inject.Inject
 import logging.Logging
 import play.api.Configuration
 import play.api.http.HeaderNames
@@ -28,6 +27,7 @@ import uk.gov.hmrc.play.bootstrap.backend.http.JsonErrorHandler
 import uk.gov.hmrc.play.bootstrap.config.HttpAuditEvent
 import utils.HttpHeaders
 
+import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 

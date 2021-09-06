@@ -19,14 +19,15 @@ package filters
 import akka.stream.Materializer
 import akka.stream.scaladsl.Sink
 import akka.util.ByteString
-import javax.inject.Inject
 import logging.Logging
 import play.api.http.HeaderNames
+import play.api.http.Status
 import play.api.mvc.Filter
 import play.api.mvc.RequestHeader
 import play.api.mvc.Result
 import utils.HttpHeaders
 
+import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 
@@ -48,28 +49,29 @@ class LoggingFilter @Inject() (implicit
                 acc + str.decodeString("UTF-8")
             }
 
-          result.body.dataStream.runWith(sink).map {
+          result.body.dataStream.runWith(sink).foreach {
             body =>
               val logMessage =
                 s"""
-              |${HttpHeaders.X_CORRELATION_ID}: ${rh.headers.get(HttpHeaders.X_CORRELATION_ID).getOrElse("undefined")}
-              |${HttpHeaders.X_REQUEST_ID}: ${rh.headers.get(HttpHeaders.X_REQUEST_ID).getOrElse("undefined")}
-              |${HttpHeaders.X_MESSAGE_TYPE}: ${rh.headers.get(HttpHeaders.X_MESSAGE_TYPE).getOrElse("undefined")}
-              |${HttpHeaders.X_MESSAGE_RECIPIENT}: ${rh.headers.get(HttpHeaders.X_MESSAGE_RECIPIENT).getOrElse("undefined")}
-              |${HeaderNames.CONTENT_TYPE}: ${rh.headers.get(HeaderNames.CONTENT_TYPE).getOrElse("undefined")}
-              |Response status: ${result.header.status}
-              |Response body:  $body
-           """.stripMargin
+                |${HttpHeaders.X_CORRELATION_ID}: ${rh.headers.get(HttpHeaders.X_CORRELATION_ID).getOrElse("undefined")}
+                |${HttpHeaders.X_REQUEST_ID}: ${rh.headers.get(HttpHeaders.X_REQUEST_ID).getOrElse("undefined")}
+                |${HttpHeaders.X_MESSAGE_TYPE}: ${rh.headers.get(HttpHeaders.X_MESSAGE_TYPE).getOrElse("undefined")}
+                |${HttpHeaders.X_MESSAGE_RECIPIENT}: ${rh.headers.get(HttpHeaders.X_MESSAGE_RECIPIENT).getOrElse("undefined")}
+                |${HeaderNames.CONTENT_TYPE}: ${rh.headers.get(HeaderNames.CONTENT_TYPE).getOrElse("undefined")}
+                |Response status: ${result.header.status}
+                |Response body: $body
+                """.trim.stripMargin
 
-              if (result.header.status < 400) {
-                logger.info(logMessage)
-              } else if (result.header.status >= 400 && result.header.status < 499) {
+              if (Status.isServerError(result.header.status)) {
+                logger.error(logMessage)
+              } else if (Status.isClientError(result.header.status)) {
                 logger.warn(logMessage)
               } else {
-                logger.error(logMessage)
+                logger.info(logMessage)
               }
           }
         }
+
         result
     }
 }

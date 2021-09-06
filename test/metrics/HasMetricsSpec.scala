@@ -21,19 +21,19 @@ import com.codahale.metrics.Histogram
 import com.codahale.metrics.MetricRegistry
 import com.codahale.metrics.Timer
 import com.kenshoo.play.metrics.Metrics
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito
 import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.OptionValues
-import org.scalatest.wordspec.AsyncWordSpecLike
 import org.scalatest.compatible.Assertion
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AsyncWordSpecLike
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.mvc.AbstractController
 import play.api.mvc.Results
 import play.api.test.FakeRequest
 import play.api.test.Helpers
-import org.mockito.ArgumentMatchers._
-import org.scalatest.matchers.should.Matchers
 
 import scala.concurrent.Future
 

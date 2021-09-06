@@ -19,7 +19,6 @@ package utils.analysis
 import com.codahale.metrics.Histogram
 import data.TestXml
 import org.mockito.ArgumentMatchers._
-import org.mockito.Mockito
 import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.freespec.AnyFreeSpec

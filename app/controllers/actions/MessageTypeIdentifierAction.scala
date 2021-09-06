@@ -21,10 +21,10 @@ import logging.Logging
 import models.MessageType
 import models.requests.MessageRecipientRequest
 import models.requests.RoutableRequest
-import play.api.mvc.Results.BadRequest
-import play.api.mvc.Results.NotImplemented
 import play.api.mvc.ActionRefiner
 import play.api.mvc.Result
+import play.api.mvc.Results.BadRequest
+import play.api.mvc.Results.NotImplemented
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
@@ -40,22 +40,24 @@ class MessageTypeIdentifierAction(val ec: ExecutionContext) extends ActionRefine
   override protected def refine[A](
     request: MessageRecipientRequest[A]
   ): Future[Either[Result, RoutableRequest[A]]] =
-    request.headers
-      .get("X-Message-Type") match {
-      case None =>
-        logger.warn("BadRequest: missing header key X-Message-Type")
-        Future.successful(Left(BadRequest("BadRequest: missing header key X-Message-Type")))
+    Future.successful {
+      for {
+        headerValue <- request.headers
+          .get("X-Message-Type")
+          .toRight {
+            val message = "Missing X-Message-Type header value"
+            logger.error(message)
+            BadRequest(message)
+          }
 
-      case Some(messageType) =>
-        MessageType.validMessages.find(
-          x => x.code == messageType
-        ) match {
-          case None =>
-            logger.warn(s"NotImplemented: X-Message-Type header $messageType is unsupported or invalid")
-            Future.successful(Left(NotImplemented(s"NotImplemented: X-Message-Type header $messageType is unsupported or invalid")))
-          case Some(mt) => Future.successful(Right(RoutableRequest(request, mt)))
-        }
-
+        messageType <- MessageType
+          .fromHeaderValue(headerValue)
+          .toRight {
+            val message = s"Invalid X-Message-Type header value: $headerValue"
+            logger.error(message)
+            NotImplemented(message)
+          }
+      } yield RoutableRequest(request, messageType)
     }
 
   override protected def executionContext: ExecutionContext = ec

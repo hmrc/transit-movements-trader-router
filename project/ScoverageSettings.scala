@@ -1,6 +1,7 @@
 import scoverage.ScoverageKeys
 
 object ScoverageSettings {
+
   def apply() = Seq(
     ScoverageKeys.coverageExcludedPackages := "<empty>;Reverse.*;.*(config|views.*);.*(BuildInfo|Routes).*",
     ScoverageKeys.coverageExcludedFiles := Seq(
@@ -14,7 +15,7 @@ object ScoverageSettings {
       ".*GuiceInjector",
       ".*Test.*"
     ).mkString(";"),
-    ScoverageKeys.coverageMinimum := 90,
+    ScoverageKeys.coverageMinimumStmtTotal := 90,
     ScoverageKeys.coverageFailOnMinimum := true,
     ScoverageKeys.coverageHighlighting := true
   )

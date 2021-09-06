@@ -17,7 +17,7 @@
 package connector
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import connectors.DestinationConnector
+import connectors.GuaranteeConnector
 import helper.WireMockServerHandler
 import models.MessageRecipient
 import org.scalacheck.Gen
@@ -34,7 +34,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.xml.Elem
 
-class DestinationConnectorSpec
+class GuaranteeConnectorSpec
     extends AnyFreeSpec
     with Matchers
     with ScalaFutures
@@ -43,11 +43,11 @@ class DestinationConnectorSpec
     with ScalaCheckPropertyChecks
     with MockitoSugar {
 
-  private val startUrl =
-    "transit-movements-trader-at-destination/movements/arrivals"
+  private val startUrl = "transit-movements-guarantee-balance/balances"
+
   val sampleXml: Elem = <xml>test</xml>
 
-  val xMessageRecipient                  = "MDTP-ARR-1-1"
+  val xMessageRecipient                  = "MDTP-GUA-1-1"
   val messageRecipient: MessageRecipient = MessageRecipient.fromHeaderValue(xMessageRecipient).get
 
   implicit val hc: HeaderCarrier =
@@ -55,21 +55,21 @@ class DestinationConnectorSpec
       Seq(
         HeaderNames.CONTENT_TYPE -> MimeTypes.XML,
         "X-Message-Recipient"    -> xMessageRecipient,
-        "X-Message-Type"         -> "IE043"
+        "X-Message-Type"         -> "IE037"
       )
     ).withExtraHeaders("X-Test-Header" -> "X-Test-Header-Value")
 
-  lazy val connector: DestinationConnector =
-    app.injector.instanceOf[DestinationConnector]
+  lazy val connector: GuaranteeConnector =
+    app.injector.instanceOf[GuaranteeConnector]
 
-  "DestinationConnector" - {
+  "GuaranteeConnector" - {
     "must return status as OK for valid input request" in {
 
       server.stubFor(
-        post(urlEqualTo(s"/$startUrl/$xMessageRecipient/messages/eis"))
+        post(urlEqualTo(s"/$startUrl/$xMessageRecipient"))
           .withHeader("Content-Type", equalTo("application/xml"))
           .withHeader("X-Message-Recipient", equalTo(xMessageRecipient))
-          .withHeader("X-Message-Type", equalTo("IE043"))
+          .withHeader("X-Message-Type", equalTo("IE037"))
           .willReturn(
             aResponse()
               .withStatus(OK)
@@ -87,7 +87,7 @@ class DestinationConnectorSpec
       forAll(errorResponses) {
         errorResponse =>
           server.stubFor(
-            post(urlEqualTo(s"/$startUrl/${messageRecipient.headerValue}/messages/eis"))
+            post(urlEqualTo(s"/$startUrl/${messageRecipient.headerValue}"))
               .willReturn(
                 aResponse()
                   .withStatus(errorResponse)
@@ -102,5 +102,5 @@ class DestinationConnectorSpec
     }
   }
 
-  override protected def portConfigKey: String = "microservice.services.trader-at-destination.port"
+  override protected def portConfigKey: String = "microservice.services.guarantee-balance.port"
 }

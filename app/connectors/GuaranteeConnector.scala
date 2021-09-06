@@ -19,7 +19,7 @@ package connectors
 import com.kenshoo.play.metrics.Metrics
 import config.AppConfig
 import metrics.HasMetrics
-import metrics.MetricsKeys.Connectors.RouteToArrivals
+import metrics.MetricsKeys.Connectors._
 import models.MessageRecipient
 import play.api.http.HeaderNames
 import uk.gov.hmrc.http.HeaderCarrier
@@ -31,20 +31,20 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 import scala.xml.NodeSeq
 
-class DestinationConnector @Inject() (
-  val config: AppConfig,
-  val http: HttpClient,
+class GuaranteeConnector @Inject() (
+  config: AppConfig,
+  http: HttpClient,
   val metrics: Metrics
 )(implicit ec: ExecutionContext)
     extends HasMetrics {
 
   def sendMessage(
-    xMessageRecipient: MessageRecipient,
+    messageRecipient: MessageRecipient,
     requestData: NodeSeq
-  )(implicit hc: HeaderCarrier): Future[HttpResponse] = withMetricsTimerResponse(RouteToArrivals) {
+  )(implicit hc: HeaderCarrier): Future[HttpResponse] = withMetricsTimerResponse(RouteToGuarantee) {
 
     val serviceUrl =
-      s"${config.traderAtDestinationUrl.baseUrl}/movements/arrivals/${xMessageRecipient.headerValue}/messages/eis"
+      s"${config.guaranteeUrl.baseUrl}/balances/${messageRecipient.headerValue}"
 
     val headers = hc.headers(
       Seq(
@@ -54,7 +54,6 @@ class DestinationConnector @Inject() (
       )
     )
 
-    // TODO: Determine which headers need to be sent on
     http.POSTString[HttpResponse](serviceUrl, requestData.toString, headers)
   }
 }
