@@ -17,7 +17,6 @@
 package controllers.actions
 
 import base.SpecBase
-import models.Directable
 import models.MessageRecipient
 import models.MessageType
 import models.requests.MessageRecipientRequest
@@ -35,7 +34,7 @@ import scala.concurrent.Future
 
 class MessageTypeIdentifierActionSpec extends SpecBase with ScalaFutures with EitherValues with ScalaCheckDrivenPropertyChecks {
 
-  private val genXMessageType: Gen[Directable] = Gen.oneOf(MessageType.validMessages)
+  private val genXMessageType: Gen[MessageType] = Gen.oneOf(MessageType.validMessages)
 
   class Harness extends MessageTypeIdentifierAction(global) {
     def run[A](request: MessageRecipientRequest[A]): Future[Either[Result, RoutableRequest[A]]] = refine(request)
@@ -43,7 +42,10 @@ class MessageTypeIdentifierActionSpec extends SpecBase with ScalaFutures with Ei
 
   "MessageTypeIdentifierAction" - {
     "must return an BadRequest when the X-Message-Type is missing" in {
-      def fakeRequest = MessageRecipientRequest(FakeRequest("", ""), MessageRecipient("MDTP-1-1"))
+      def fakeRequest = MessageRecipientRequest(
+        FakeRequest("", ""),
+        MessageRecipient.fromHeaderValue("MDTP-ARR-1-1").get
+      )
 
       val harness = new Harness
 
@@ -56,14 +58,14 @@ class MessageTypeIdentifierActionSpec extends SpecBase with ScalaFutures with Ei
       }
     }
 
-    "will process the action when the X-Message-Type is present" in {
+    "will process the action when a valid X-Message-Type is present" in {
       forAll(genXMessageType) {
         xMessageType =>
           def fakeRequest = MessageRecipientRequest(
             FakeRequest("", "").withHeaders(
               "X-Message-Type" -> xMessageType.code
             ),
-            MessageRecipient("MDTP-1-1")
+            MessageRecipient.fromHeaderValue("MDTP-ARR-1-1").get
           )
 
           val action: Harness = new Harness()
@@ -82,7 +84,7 @@ class MessageTypeIdentifierActionSpec extends SpecBase with ScalaFutures with Ei
         FakeRequest("", "").withHeaders(
           "X-Message-Type" -> "IE971"
         ),
-        MessageRecipient("MDTP-1-1")
+        MessageRecipient.fromHeaderValue("MDTP-ARR-1-1").get
       )
 
       val action: Harness = new Harness()

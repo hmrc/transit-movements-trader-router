@@ -17,23 +17,28 @@
 package models
 
 import base.SpecBase
+import org.scalatest.OptionValues
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
-class MessageRecipientSpec extends SpecBase with ScalaCheckDrivenPropertyChecks {
+class MessageRecipientSpec extends SpecBase with ScalaCheckDrivenPropertyChecks with OptionValues {
 
   "MessageRecipient must be" - {
     "DepartureRecipient" in {
-      val messageRecipient = MessageRecipient("MDTP-DEP-1-1")
-      messageRecipient shouldBe a[DepartureRecipient]
+      val messageRecipient = MessageRecipient.fromHeaderValue("MDTP-DEP-1-1")
+      messageRecipient.value shouldBe a[DepartureRecipient]
     }
     "ArrivalRecipient" in {
-      val messageRecipient = MessageRecipient("MDTP-ARR-1-1")
-      messageRecipient shouldBe an[ArrivalRecipient]
+      val messageRecipient = MessageRecipient.fromHeaderValue("MDTP-ARR-1-1")
+      messageRecipient.value shouldBe an[ArrivalRecipient]
     }
-    "ArrivalRecipient as default" in {
-      val messageRecipient = MessageRecipient("MDTP-1-1")
-      messageRecipient shouldBe an[ArrivalRecipient]
+    "GuaranteeRecipient" in {
+      val messageRecipient = MessageRecipient.fromHeaderValue("MDTP-GUA-1-1")
+      messageRecipient.value shouldBe an[GuaranteeRecipient]
+    }
+    "None when there is no match" in {
+      val messageRecipient = MessageRecipient.fromHeaderValue("MDTP-1-1")
+      messageRecipient shouldBe None
     }
   }
 }

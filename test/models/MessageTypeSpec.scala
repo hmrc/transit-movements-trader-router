@@ -18,145 +18,121 @@ package models
 
 import base.SpecBase
 import models.MessageType._
-import org.scalacheck.Gen
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import play.api.libs.json.JsError
-import play.api.libs.json.JsNumber
-import play.api.libs.json.JsString
-import play.api.libs.json.JsSuccess
-import play.api.libs.json.Json
 
 class MessageTypeSpec extends SpecBase with ScalaCheckDrivenPropertyChecks {
 
   "MessageType must contain" - {
     "PositiveAcknowledgement" in {
-      MessageType.allMessages must contain(PositiveAcknowledgement)
+      MessageType.validMessages must contain(PositiveAcknowledgement)
       PositiveAcknowledgement.code mustEqual "IE928"
       PositiveAcknowledgement.rootNode mustEqual "CC928A"
       MessageType.departureValues must contain(PositiveAcknowledgement)
     }
 
     "MrnAllocated" in {
-      MessageType.allMessages must contain(MrnAllocated)
+      MessageType.validMessages must contain(MrnAllocated)
       MrnAllocated.code mustEqual "IE028"
       MrnAllocated.rootNode mustEqual "CC028A"
       MessageType.departureValues must contain(MrnAllocated)
     }
 
     "DeclarationRejected" in {
-      MessageType.allMessages must contain(DeclarationRejected)
+      MessageType.validMessages must contain(DeclarationRejected)
       DeclarationRejected.code mustEqual "IE016"
       DeclarationRejected.rootNode mustEqual "CC016A"
       MessageType.departureValues must contain(DeclarationRejected)
     }
 
     "ControlDecisionNotification" in {
-      MessageType.allMessages must contain(ControlDecisionNotification)
+      MessageType.validMessages must contain(ControlDecisionNotification)
       ControlDecisionNotification.code mustEqual "IE060"
       ControlDecisionNotification.rootNode mustEqual "CC060A"
       MessageType.departureValues must contain(ControlDecisionNotification)
     }
 
     "NoReleaseForTransit" in {
-      MessageType.allMessages must contain(NoReleaseForTransit)
+      MessageType.validMessages must contain(NoReleaseForTransit)
       NoReleaseForTransit.code mustEqual "IE051"
       NoReleaseForTransit.rootNode mustEqual "CC051B"
       MessageType.departureValues must contain(NoReleaseForTransit)
     }
 
     "ReleaseForTransit" in {
-      MessageType.allMessages must contain(ReleaseForTransit)
+      MessageType.validMessages must contain(ReleaseForTransit)
       ReleaseForTransit.code mustEqual "IE029"
       ReleaseForTransit.rootNode mustEqual "CC029B"
       MessageType.departureValues must contain(ReleaseForTransit)
     }
 
     "CancellationDecision" in {
-      MessageType.allMessages must contain(CancellationDecision)
+      MessageType.validMessages must contain(CancellationDecision)
       CancellationDecision.code mustEqual "IE009"
       CancellationDecision.rootNode mustEqual "CC009A"
       MessageType.departureValues must contain(CancellationDecision)
     }
 
     "WriteOffNotification" in {
-      MessageType.allMessages must contain(WriteOffNotification)
+      MessageType.validMessages must contain(WriteOffNotification)
       WriteOffNotification.code mustEqual "IE045"
       WriteOffNotification.rootNode mustEqual "CC045A"
       MessageType.departureValues must contain(WriteOffNotification)
     }
 
     "GuaranteeNotValid" in {
-      MessageType.allMessages must contain(GuaranteeNotValid)
+      MessageType.validMessages must contain(GuaranteeNotValid)
       GuaranteeNotValid.code mustEqual "IE055"
       GuaranteeNotValid.rootNode mustEqual "CC055A"
       MessageType.departureValues must contain(GuaranteeNotValid)
     }
 
     "ArrivalRejection" in {
-      MessageType.allMessages must contain(ArrivalRejection)
+      MessageType.validMessages must contain(ArrivalRejection)
       ArrivalRejection.code mustEqual "IE008"
       ArrivalRejection.rootNode mustEqual "CC008A"
       MessageType.arrivalValues must contain(ArrivalRejection)
     }
 
     "UnloadingPermission" in {
-      MessageType.allMessages must contain(UnloadingPermission)
+      MessageType.validMessages must contain(UnloadingPermission)
       UnloadingPermission.code mustEqual "IE043"
       UnloadingPermission.rootNode mustEqual "CC043A"
       MessageType.arrivalValues must contain(UnloadingPermission)
     }
 
     "UnloadingRemarksRejection" in {
-      MessageType.allMessages must contain(UnloadingRemarksRejection)
+      MessageType.validMessages must contain(UnloadingRemarksRejection)
       UnloadingRemarksRejection.code mustEqual "IE058"
       UnloadingRemarksRejection.rootNode mustEqual "CC058A"
       MessageType.arrivalValues must contain(UnloadingRemarksRejection)
     }
 
     "GoodsReleased" in {
-      MessageType.allMessages must contain(GoodsReleased)
+      MessageType.validMessages must contain(GoodsReleased)
       GoodsReleased.code mustEqual "IE025"
       GoodsReleased.rootNode mustEqual "CC025A"
       MessageType.arrivalValues must contain(GoodsReleased)
     }
 
+    "ResponseQueryOnGuarantees" in {
+      MessageType.validMessages must contain(ResponseQueryOnGuarantees)
+      MessageType.guaranteeValues must contain(ResponseQueryOnGuarantees)
+      ResponseQueryOnGuarantees.code mustEqual "IE037"
+      ResponseQueryOnGuarantees.rootNode mustEqual "CD037A"
+    }
+
     "XMLSubmissionNegativeAcknowledgement" in {
-      MessageType.allMessages must contain(XMLSubmissionNegativeAcknowledgement)
+      MessageType.validMessages must contain(XMLSubmissionNegativeAcknowledgement)
+      MessageType.errorValues must contain(XMLSubmissionNegativeAcknowledgement)
       XMLSubmissionNegativeAcknowledgement.code mustEqual "IE917"
       XMLSubmissionNegativeAcknowledgement.rootNode mustEqual "CC917A"
-      MessageType.arrivalValues must contain(XMLSubmissionNegativeAcknowledgement)
+    }
+
+    "FunctionalNegativeAcknowledgement" in {
+      MessageType.validMessages must contain(FunctionalNegativeAcknowledgement)
+      MessageType.errorValues must contain(FunctionalNegativeAcknowledgement)
+      FunctionalNegativeAcknowledgement.code mustEqual "IE906"
+      FunctionalNegativeAcknowledgement.rootNode mustEqual "CD906A"
     }
   }
-
-  "Json reads and writes" - {
-    "writes" in {
-      forAll(Gen.oneOf[MessageType](MessageType.allMessages)) {
-        messageType =>
-          Json.toJson(messageType) mustEqual JsString(messageType.code)
-      }
-    }
-
-    "reads" - {
-      "returns the message type when given the code for a message" in {
-        forAll(Gen.oneOf[MessageType](MessageType.allMessages)) {
-          message =>
-            JsString(message.code).validate[MessageType] mustEqual JsSuccess(message)
-        }
-      }
-
-      "returns an error when the message type code is not recognised" in {
-        val invalidMessageCode = JsString("InvalidMessageCode")
-
-        invalidMessageCode.validate[MessageType] mustEqual JsError("Not a recognised value")
-      }
-
-      "returns an error when the message type code is not a string" in {
-        val invalidMessageCode = JsNumber(1)
-
-        invalidMessageCode.validate[MessageType] mustEqual JsError("Invalid type. Expected a JsString got a class play.api.libs.json.JsNumber")
-      }
-
-    }
-  }
-
 }

@@ -16,11 +16,7 @@
 
 package utils.analysis
 
-import java.nio.charset.StandardCharsets
-
 import com.kenshoo.play.metrics.Metrics
-import javax.inject.Inject
-import javax.inject.Singleton
 import metrics.HasMetrics
 import metrics.MetricsKeys.Messages._
 import models.MessageType
@@ -28,6 +24,9 @@ import models.MessageType.NoReleaseForTransit
 import models.MessageType.ReleaseForTransit
 import models.MessageType.UnloadingPermission
 
+import java.nio.charset.StandardCharsets
+import javax.inject.Inject
+import javax.inject.Singleton
 import scala.xml.NodeSeq
 
 @Singleton

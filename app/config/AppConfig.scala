@@ -16,13 +16,13 @@
 
 package config
 
+import play.api.Configuration
+
 import javax.inject.Inject
 import javax.inject.Singleton
-import play.api.Configuration
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 @Singleton
-class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig) {
+class AppConfig @Inject() (config: Configuration) {
 
   val traderAtDestinationUrl: Service =
     config.get[Service]("microservice.services.trader-at-destination")
@@ -30,9 +30,6 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   val traderAtDepartureUrl: Service =
     config.get[Service]("microservice.services.trader-at-departure")
 
-  val auditingEnabled: Boolean = config.get[Boolean]("auditing.enabled")
-
-  val graphiteHost: String =
-    config.get[String]("microservice.metrics.graphite.host")
-
+  val guaranteeUrl: Service =
+    config.get[Service]("microservice.services.guarantee-balance")
 }

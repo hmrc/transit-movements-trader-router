@@ -16,8 +16,6 @@
 
 package metrics
 
-import java.util.concurrent.atomic.AtomicBoolean
-
 import com.codahale.metrics.MetricRegistry
 import com.kenshoo.play.metrics.Metrics
 import play.api.mvc.Action
@@ -25,6 +23,7 @@ import play.api.mvc.BaseController
 import play.api.mvc.Result
 import uk.gov.hmrc.http.HttpResponse
 
+import java.util.concurrent.atomic.AtomicBoolean
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 import scala.util.control.NonFatal

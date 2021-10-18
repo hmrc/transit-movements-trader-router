@@ -18,36 +18,35 @@ package models
 
 import scala.xml.NodeSeq
 
-trait MessageType extends IeMetadata {
-  def code: String
-  def rootNode: String
-}
+sealed abstract class MessageType(val code: String, val rootNode: String)
 
-sealed trait Directable extends MessageType
-trait ArrivalMessage    extends Directable
-trait DepartureMessage  extends Directable
-trait ErrorMessage      extends Directable
+sealed abstract class ArrivalMessage(override val code: String, override val rootNode: String)   extends MessageType(code, rootNode)
+sealed abstract class DepartureMessage(override val code: String, override val rootNode: String) extends MessageType(code, rootNode)
+sealed abstract class GuaranteeMessage(override val code: String, override val rootNode: String) extends MessageType(code, rootNode)
+sealed abstract class ErrorMessage(override val code: String, override val rootNode: String)     extends MessageType(code, rootNode)
 
-object MessageType extends Enumerable.Implicits {
+object MessageType {
+  case object ArrivalRejection          extends ArrivalMessage("IE008", "CC008A")
+  case object UnloadingPermission       extends ArrivalMessage("IE043", "CC043A")
+  case object UnloadingRemarksRejection extends ArrivalMessage("IE058", "CC058A")
+  case object GoodsReleased             extends ArrivalMessage("IE025", "CC025A")
 
-  case object ArrivalRejection          extends IeMetadata("IE008", "CC008A") with ArrivalMessage
-  case object UnloadingPermission       extends IeMetadata("IE043", "CC043A") with ArrivalMessage
-  case object UnloadingRemarksRejection extends IeMetadata("IE058", "CC058A") with ArrivalMessage
-  case object GoodsReleased             extends IeMetadata("IE025", "CC025A") with ArrivalMessage
+  case object PositiveAcknowledgement     extends DepartureMessage("IE928", "CC928A")
+  case object MrnAllocated                extends DepartureMessage("IE028", "CC028A")
+  case object DeclarationRejected         extends DepartureMessage("IE016", "CC016A")
+  case object ControlDecisionNotification extends DepartureMessage("IE060", "CC060A")
+  case object NoReleaseForTransit         extends DepartureMessage("IE051", "CC051B")
+  case object ReleaseForTransit           extends DepartureMessage("IE029", "CC029B")
+  case object CancellationDecision        extends DepartureMessage("IE009", "CC009A")
+  case object WriteOffNotification        extends DepartureMessage("IE045", "CC045A")
+  case object GuaranteeNotValid           extends DepartureMessage("IE055", "CC055A")
 
-  case object PositiveAcknowledgement     extends IeMetadata("IE928", "CC928A") with DepartureMessage
-  case object MrnAllocated                extends IeMetadata("IE028", "CC028A") with DepartureMessage
-  case object DeclarationRejected         extends IeMetadata("IE016", "CC016A") with DepartureMessage
-  case object ControlDecisionNotification extends IeMetadata("IE060", "CC060A") with DepartureMessage
-  case object NoReleaseForTransit         extends IeMetadata("IE051", "CC051B") with DepartureMessage
-  case object ReleaseForTransit           extends IeMetadata("IE029", "CC029B") with DepartureMessage
-  case object CancellationDecision        extends IeMetadata("IE009", "CC009A") with DepartureMessage
-  case object WriteOffNotification        extends IeMetadata("IE045", "CC045A") with DepartureMessage
-  case object GuaranteeNotValid           extends IeMetadata("IE055", "CC055A") with DepartureMessage
+  case object ResponseQueryOnGuarantees extends GuaranteeMessage("IE037", "CD037A")
 
-  case object XMLSubmissionNegativeAcknowledgement extends IeMetadata("IE917", "CC917A") with ErrorMessage
+  case object XMLSubmissionNegativeAcknowledgement extends ErrorMessage("IE917", "CC917A")
+  case object FunctionalNegativeAcknowledgement    extends ErrorMessage("IE906", "CD906A")
 
-  val departureValues: Seq[Directable] = Seq(
+  val departureValues: Set[DepartureMessage] = Set(
     PositiveAcknowledgement,
     MrnAllocated,
     DeclarationRejected,
@@ -59,26 +58,23 @@ object MessageType extends Enumerable.Implicits {
     GuaranteeNotValid
   )
 
-  val arrivalValues: Seq[Directable] =
-    Seq(ArrivalRejection, UnloadingPermission, UnloadingRemarksRejection, GoodsReleased, XMLSubmissionNegativeAcknowledgement)
+  val arrivalValues: Set[ArrivalMessage] =
+    Set(ArrivalRejection, UnloadingPermission, UnloadingRemarksRejection, GoodsReleased)
 
-  val errorValues: Seq[Directable] = Seq(XMLSubmissionNegativeAcknowledgement)
+  val guaranteeValues: Set[GuaranteeMessage] =
+    Set(ResponseQueryOnGuarantees)
 
-  val validMessages: Seq[Directable] = departureValues ++ arrivalValues ++ errorValues
+  val errorValues: Set[ErrorMessage] = Set(XMLSubmissionNegativeAcknowledgement, FunctionalNegativeAcknowledgement)
 
-  val allMessages: Seq[MessageType] = departureValues ++ arrivalValues ++ errorValues
+  val validMessages: Set[MessageType] = departureValues ++ arrivalValues ++ guaranteeValues ++ errorValues
 
-  implicit val enumerable: Enumerable[MessageType] =
-    Enumerable(
-      allMessages.map(
-        v => v.code -> v
-      ): _*
-    )
+  def fromHeaderValue(headerValue: String): Option[MessageType] =
+    validMessages.find(_.code == headerValue)
 
   def getMessageType(nodeSeq: NodeSeq): Option[MessageType] =
     nodeSeq.headOption.flatMap(
       head =>
-        allMessages.find(
+        validMessages.find(
           x => x.rootNode == head.label
         )
     )

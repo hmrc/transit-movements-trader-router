@@ -18,18 +18,18 @@ package connectors
 
 import com.kenshoo.play.metrics.Metrics
 import config.AppConfig
-import models.MessageRecipient
-import javax.inject.Inject
 import metrics.HasMetrics
-import play.api.mvc.Headers
+import metrics.MetricsKeys.Connectors._
+import models.MessageRecipient
+import play.api.http.HeaderNames
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.HttpClient
 import uk.gov.hmrc.http.HttpResponse
 
+import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 import scala.xml.NodeSeq
-import metrics.MetricsKeys.Connectors._
 
 class DepartureConnector @Inject() (
   config: AppConfig,
@@ -40,17 +40,20 @@ class DepartureConnector @Inject() (
 
   def sendMessage(
     messageRecipient: MessageRecipient,
-    requestData: NodeSeq,
-    headers: Headers
+    requestData: NodeSeq
   )(implicit hc: HeaderCarrier): Future[HttpResponse] = withMetricsTimerResponse(RouteToDepartures) {
 
     val serviceUrl =
       s"${config.traderAtDepartureUrl.baseUrl}/movements/departures/${messageRecipient.headerValue}/messages/eis"
 
-    val header = headers.headers.filter(
-      header => header._1.equalsIgnoreCase("X-Message-Recipient") || header._1.equalsIgnoreCase("X-Message-Type") || header._1.equalsIgnoreCase("Content-Type")
+    val headers = hc.headers(
+      Seq(
+        HeaderNames.CONTENT_TYPE,
+        "X-Message-Recipient",
+        "X-Message-Type"
+      )
     )
 
-    http.POSTString[HttpResponse](serviceUrl, requestData.toString, header)
+    http.POSTString[HttpResponse](serviceUrl, requestData.toString, headers)
   }
 }

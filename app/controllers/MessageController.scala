@@ -21,17 +21,17 @@ import controllers.actions.AnalyseMessageActionProvider
 import controllers.actions.MessageRecipientIdentifierActionProvider
 import controllers.actions.MessageTypeIdentifierActionProvider
 import logging.Logging
-import javax.inject.Inject
 import metrics.HasActionMetrics
+import metrics.MetricsKeys.Endpoints._
 import play.api.mvc.Action
 import play.api.mvc.ControllerComponents
 import services.RoutingService
+import uk.gov.hmrc.http.HttpErrorFunctions
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
+
+import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 import scala.xml.NodeSeq
-import metrics.MetricsKeys.Endpoints._
-import models.ArrivalMessage
-import uk.gov.hmrc.http.HttpErrorFunctions
 
 class MessageController @Inject() (
   messageRecipientIdentifier: MessageRecipientIdentifierActionProvider,
@@ -51,7 +51,7 @@ class MessageController @Inject() (
       (messageRecipientIdentifier() andThen messageTypeIdentifier() andThen analyseMessage()).async(parse.xml) {
         implicit request =>
           routingService
-            .sendMessage(request.messageRecipient, request.directable, request.body, request.headers)
+            .sendMessage(request.messageRecipient, request.messageType, request.body)
             .map {
               response =>
                 response.status match {

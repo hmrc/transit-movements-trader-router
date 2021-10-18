@@ -33,5 +33,6 @@ object MetricsKeys {
   object Connectors {
     val RouteToDepartures = "incoming-router-to-departure"
     val RouteToArrivals   = "incoming-router-to-destination"
+    val RouteToGuarantee  = "incoming-router-to-guarantee"
   }
 }

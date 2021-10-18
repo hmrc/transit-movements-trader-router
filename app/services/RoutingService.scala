@@ -18,13 +18,15 @@ package services
 
 import connectors.DepartureConnector
 import connectors.DestinationConnector
+import connectors.GuaranteeConnector
 import models.ArrivalMessage
 import models.ArrivalRecipient
 import models.DepartureMessage
 import models.DepartureRecipient
-import models.Directable
+import models.GuaranteeMessage
+import models.GuaranteeRecipient
 import models.MessageRecipient
-import play.api.mvc.Headers
+import models.MessageType
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.HttpResponse
 
@@ -32,22 +34,24 @@ import javax.inject.Inject
 import scala.concurrent.Future
 import scala.xml.NodeSeq
 
-class RoutingService @Inject() (destinationConnector: DestinationConnector, departureConnector: DepartureConnector) {
+class RoutingService @Inject() (destinationConnector: DestinationConnector, departureConnector: DepartureConnector, guaranteeConnector: GuaranteeConnector) {
 
-  def sendMessage(messageRecipient: MessageRecipient, directable: Directable, messageBody: NodeSeq, headers: Headers)(implicit
-    hc: HeaderCarrier
-  ): Future[HttpResponse] =
-    directable match {
+  def sendMessage(messageRecipient: MessageRecipient, messageType: MessageType, messageBody: NodeSeq)(implicit hc: HeaderCarrier): Future[HttpResponse] =
+    messageType match {
       case _: ArrivalMessage =>
-        destinationConnector.sendMessage(messageRecipient, messageBody, headers)
+        destinationConnector.sendMessage(messageRecipient, messageBody)
       case _: DepartureMessage =>
-        departureConnector.sendMessage(messageRecipient, messageBody, headers)
+        departureConnector.sendMessage(messageRecipient, messageBody)
+      case _: GuaranteeMessage =>
+        guaranteeConnector.sendMessage(messageRecipient, messageBody)
       case _ =>
         messageRecipient match {
           case departureRecipient: DepartureRecipient =>
-            departureConnector.sendMessage(departureRecipient, messageBody, headers)
+            departureConnector.sendMessage(departureRecipient, messageBody)
           case arrivalRecipient: ArrivalRecipient =>
-            destinationConnector.sendMessage(arrivalRecipient, messageBody, headers)
+            destinationConnector.sendMessage(arrivalRecipient, messageBody)
+          case guaranteeRecipient: GuaranteeRecipient =>
+            guaranteeConnector.sendMessage(guaranteeRecipient, messageBody)
         }
     }
 }

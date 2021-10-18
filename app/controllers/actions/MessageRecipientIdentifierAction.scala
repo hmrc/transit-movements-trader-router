@@ -42,15 +42,23 @@ class MessageRecipientIdentifierAction(val executionContext: ExecutionContext) e
     request: Request[A]
   ): Future[Either[Result, MessageRecipientRequest[A]]] =
     Future.successful {
-      request.headers
-        .get("X-Message-Recipient")
-        .toRight {
-          logger.error("BadRequest: missing header key X-Message-Recipient")
-          BadRequest
-        }
-        .right
-        .map(
-          x => requests.MessageRecipientRequest(request, MessageRecipient(x))
-        )
+      for {
+        headerValue <- request.headers
+          .get("X-Message-Recipient")
+          .toRight {
+            val message = "Missing X-Message-Recipient header value"
+            logger.error(message)
+            BadRequest(message)
+          }
+
+        messageRecipient <- MessageRecipient
+          .fromHeaderValue(headerValue)
+          .toRight {
+            val message = "Invalid X-Message-Recipient header value"
+            logger.error(message)
+            BadRequest(message)
+          }
+
+      } yield requests.MessageRecipientRequest(request, messageRecipient)
     }
 }
