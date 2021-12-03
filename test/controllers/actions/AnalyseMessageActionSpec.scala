@@ -59,7 +59,8 @@ class AnalyseMessageActionSpec extends AnyFreeSpec with Matchers with MockitoSug
       val application = GuiceApplicationBuilder()
         .overrides(bind[MessageAnalyser].toInstance(messageAnalyser))
         .configure(
-          "metrics.jvm" -> false
+          "metrics.jvm" -> false,
+          "microservice.services.features.nctsMonitoringEnabled" -> true
         )
         .build()
 
@@ -81,7 +82,8 @@ class AnalyseMessageActionSpec extends AnyFreeSpec with Matchers with MockitoSug
       val application = GuiceApplicationBuilder()
         .overrides(bind[MessageAnalyser].toInstance(messageAnalyser))
         .configure(
-          "metrics.jvm" -> false
+          "metrics.jvm" -> false,
+          "microservice.services.features.nctsMonitoringEnabled" -> true
         )
         .build()
 

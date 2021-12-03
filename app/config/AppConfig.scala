@@ -32,4 +32,10 @@ class AppConfig @Inject() (config: Configuration) {
 
   val guaranteeUrl: Service =
     config.get[Service]("microservice.services.guarantee-balance")
+
+  val nctsMonitoringUrl: Service =
+    config.get[Service]("microservice.services.ncts-monitoring")
+
+  val nctsMonitoringEnabled: Boolean =
+    config.get[Boolean]("microservice.services.features.nctsMonitoringEnabled")
 }

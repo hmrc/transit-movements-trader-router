@@ -21,11 +21,7 @@ import akka.stream.Materializer
 import base.SpecBase
 import org.scalatest.concurrent.ScalaFutures
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.mvc.Action
-import play.api.mvc.AnyContent
-import play.api.mvc.DefaultActionBuilder
-import play.api.mvc.RequestHeader
-import play.api.mvc.Results
+import play.api.mvc._
 import play.api.test.FakeRequest
 import play.api.test.Helpers.running
 
@@ -38,7 +34,9 @@ class LoggingFilterSpec extends SpecBase with ScalaFutures {
 
     "must pass through a request" in {
 
-      val app = new GuiceApplicationBuilder().build()
+      val app = new GuiceApplicationBuilder()
+        .configure("microservice.services.features.nctsMonitoringEnabled" -> true)
+        .build()
 
       running(app) {
 
