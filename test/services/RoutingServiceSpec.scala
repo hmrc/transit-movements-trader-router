@@ -17,19 +17,16 @@
 package services
 
 import base.SpecBase
-import connectors.DepartureConnector
-import connectors.DestinationConnector
-import connectors.GuaranteeConnector
-import models.MessageRecipient
-import models.MessageType
-import models.MessageType.XMLSubmissionNegativeAcknowledgement
+import config.AppConfig
+import connectors.{DepartureConnector, DestinationConnector, GuaranteeConnector, NCTSMonitoringConnector}
+import models.{MessageRecipient, MessageType}
+import models.MessageType.{XMLSubmissionNegativeAcknowledgement, nctsMonitoringDepartureValues}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalacheck.Gen
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.HttpResponse
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.Future
 
@@ -38,6 +35,8 @@ class RoutingServiceSpec extends SpecBase with BeforeAndAfterEach with ScalaChec
   val destinationMessageTypes: Gen[MessageType] = Gen.oneOf(MessageType.arrivalValues)
   val departureMessageTypes: Gen[MessageType]   = Gen.oneOf(MessageType.departureValues)
   val guaranteeMessageTypes: Gen[MessageType]   = Gen.oneOf(MessageType.guaranteeValues)
+  val nctsMonitoringDepartureMessageTypes: Gen[MessageType]   = Gen.oneOf(MessageType.nctsMonitoringDepartureValues)
+  val nonNCTSMonitoringDepartureMessageTypes: Gen[MessageType]   = Gen.oneOf(MessageType.validMessages.diff(nctsMonitoringDepartureValues))
 
   "sendMessage must" - {
     "use DepartureConnector when forwarding a Departure Message" in {
@@ -47,17 +46,102 @@ class RoutingServiceSpec extends SpecBase with BeforeAndAfterEach with ScalaChec
           val mockDepartureConnector   = mock[DepartureConnector]
           val mockDestinationConnector = mock[DestinationConnector]
           val mockGuaranteeConnector   = mock[GuaranteeConnector]
+          val mockNCTSMonitoringConnector  = mock[NCTSMonitoringConnector]
+          val mockAppConfig            = mock[AppConfig]
           val messageRecipient         = MessageRecipient.fromHeaderValue("MDTP-DEP-1-1").get
 
           when(mockDepartureConnector.sendMessage(any(), any())(any())).thenReturn(Future.successful(HttpResponse(200, "")))
+          when(mockNCTSMonitoringConnector.sendMessage(any())(any())).thenReturn(Future.successful(HttpResponse(200, "")))
+          when(mockAppConfig.nctsMonitoringEnabled).thenReturn(false)
 
-          val sut = new RoutingService(mockDestinationConnector, mockDepartureConnector, mockGuaranteeConnector)
+          val sut = new RoutingService(
+            mockDestinationConnector, mockDepartureConnector, mockGuaranteeConnector, mockNCTSMonitoringConnector, mockAppConfig
+          )
 
           sut.sendMessage(messageRecipient, messageType, <Abc>123</Abc>)
 
           verify(mockDepartureConnector, times(1)).sendMessage(any(), any())(any())
           verify(mockDestinationConnector, times(0)).sendMessage(any(), any())(any())
           verify(mockGuaranteeConnector, times(0)).sendMessage(any(), any())(any())
+          verify(mockNCTSMonitoringConnector, times(0)).sendMessage(any())(any())
+      }
+    }
+
+    "use NCTSMonitoringConnector when forwarding a Departure Message if the message type is relevant" in {
+
+      forAll(nctsMonitoringDepartureMessageTypes) {
+        messageType =>
+          println("MESSAGETYPE: " + messageType)
+          val mockDepartureConnector   = mock[DepartureConnector]
+          val mockDestinationConnector = mock[DestinationConnector]
+          val mockGuaranteeConnector   = mock[GuaranteeConnector]
+          val mockNCTSMonitoringConnector  = mock[NCTSMonitoringConnector]
+          val mockAppConfig            = mock[AppConfig]
+          val messageRecipient         = MessageRecipient.fromHeaderValue("MDTP-DEP-1-1").get
+
+          when(mockDepartureConnector.sendMessage(any(), any())(any())).thenReturn(Future.successful(HttpResponse(200, "")))
+          when(mockNCTSMonitoringConnector.sendMessage(any())(any())).thenReturn(Future.successful(HttpResponse(200, "")))
+          when(mockAppConfig.nctsMonitoringEnabled).thenReturn(true)
+
+          val sut = new RoutingService(
+            mockDestinationConnector, mockDepartureConnector, mockGuaranteeConnector, mockNCTSMonitoringConnector, mockAppConfig
+          )
+
+          sut.sendMessage(messageRecipient, messageType, <Abc>123</Abc>)
+
+          verify(mockNCTSMonitoringConnector, times(1)).sendMessage(any())(any())
+      }
+    }
+
+    "not use NCTSMonitoringConnector when forwarding a Departure Message if the message type is irrelevant" in {
+
+      forAll(nonNCTSMonitoringDepartureMessageTypes) {
+        messageType =>
+          val mockDepartureConnector   = mock[DepartureConnector]
+          val mockDestinationConnector = mock[DestinationConnector]
+          val mockGuaranteeConnector   = mock[GuaranteeConnector]
+          val mockNCTSMonitoringConnector  = mock[NCTSMonitoringConnector]
+          val mockAppConfig            = mock[AppConfig]
+          val messageRecipient         = MessageRecipient.fromHeaderValue("MDTP-DEP-1-1").get
+
+          when(mockDepartureConnector.sendMessage(any(), any())(any())).thenReturn(Future.successful(HttpResponse(200, "")))
+          when(mockAppConfig.nctsMonitoringEnabled).thenReturn(true)
+
+          val sut = new RoutingService(
+            mockDestinationConnector, mockDepartureConnector, mockGuaranteeConnector, mockNCTSMonitoringConnector, mockAppConfig
+          )
+
+          sut.sendMessage(messageRecipient, messageType, <Abc>123</Abc>)
+
+          verify(mockNCTSMonitoringConnector, times(0)).sendMessage(any())(any())
+      }
+    }
+
+    "not use NCTSMonitoringConnector when the NCTS monitoring feature is not disabled" in {
+
+      forAll(departureMessageTypes) {
+        messageType =>
+          val mockDepartureConnector   = mock[DepartureConnector]
+          val mockDestinationConnector = mock[DestinationConnector]
+          val mockGuaranteeConnector   = mock[GuaranteeConnector]
+          val mockNCTSMonitoringConnector  = mock[NCTSMonitoringConnector]
+          val mockAppConfig            = mock[AppConfig]
+          val messageRecipient         = MessageRecipient.fromHeaderValue("MDTP-DEP-1-1").get
+
+          when(mockDepartureConnector.sendMessage(any(), any())(any())).thenReturn(Future.successful(HttpResponse(200, "")))
+          when(mockNCTSMonitoringConnector.sendMessage(any())(any())).thenReturn(Future.successful(HttpResponse(200, "")))
+          when(mockAppConfig.nctsMonitoringEnabled).thenReturn(false)
+
+          val sut = new RoutingService(
+            mockDestinationConnector, mockDepartureConnector, mockGuaranteeConnector, mockNCTSMonitoringConnector, mockAppConfig
+          )
+
+          sut.sendMessage(messageRecipient, messageType, <Abc>123</Abc>)
+
+          verify(mockDepartureConnector, times(1)).sendMessage(any(), any())(any())
+          verify(mockDestinationConnector, times(0)).sendMessage(any(), any())(any())
+          verify(mockGuaranteeConnector, times(0)).sendMessage(any(), any())(any())
+          verify(mockNCTSMonitoringConnector, times(0)).sendMessage(any())(any())
       }
     }
 
@@ -67,16 +151,23 @@ class RoutingServiceSpec extends SpecBase with BeforeAndAfterEach with ScalaChec
           val mockDepartureConnector   = mock[DepartureConnector]
           val mockDestinationConnector = mock[DestinationConnector]
           val mockGuaranteeConnector   = mock[GuaranteeConnector]
+          val mockNCTSMonitoringConnector  = mock[NCTSMonitoringConnector]
+          val mockAppConfig            = mock[AppConfig]
           val messageRecipient         = MessageRecipient.fromHeaderValue("MDTP-ARR-1-1").get
 
           when(mockDestinationConnector.sendMessage(any(), any())(any())).thenReturn(Future.successful(HttpResponse(200, "")))
-          val sut = new RoutingService(mockDestinationConnector, mockDepartureConnector, mockGuaranteeConnector)
+          when(mockAppConfig.nctsMonitoringEnabled).thenReturn(true)
+
+          val sut = new RoutingService(
+            mockDestinationConnector, mockDepartureConnector, mockGuaranteeConnector, mockNCTSMonitoringConnector, mockAppConfig
+          )
 
           sut.sendMessage(messageRecipient, messageType, <Abc>123</Abc>)(HeaderCarrier())
 
           verify(mockDepartureConnector, times(0)).sendMessage(any(), any())(any())
           verify(mockDestinationConnector, times(1)).sendMessage(any(), any())(any())
           verify(mockGuaranteeConnector, times(0)).sendMessage(any(), any())(any())
+          verify(mockNCTSMonitoringConnector, times(0)).sendMessage(any())(any())
       }
     }
 
@@ -86,16 +177,22 @@ class RoutingServiceSpec extends SpecBase with BeforeAndAfterEach with ScalaChec
           val mockDepartureConnector   = mock[DepartureConnector]
           val mockDestinationConnector = mock[DestinationConnector]
           val mockGuaranteeConnector   = mock[GuaranteeConnector]
+          val mockNCTSMonitoringConnector  = mock[NCTSMonitoringConnector]
+          val mockAppConfig            = mock[AppConfig]
           val messageRecipient         = MessageRecipient.fromHeaderValue("MDTP-GUA-1-1").get
 
           when(mockDestinationConnector.sendMessage(any(), any())(any())).thenReturn(Future.successful(HttpResponse(200, "")))
-          val sut = new RoutingService(mockDestinationConnector, mockDepartureConnector, mockGuaranteeConnector)
+
+          val sut = new RoutingService(
+            mockDestinationConnector, mockDepartureConnector, mockGuaranteeConnector, mockNCTSMonitoringConnector, mockAppConfig
+          )
 
           sut.sendMessage(messageRecipient, messageType, <Abc>123</Abc>)(HeaderCarrier())
 
           verify(mockDepartureConnector, times(0)).sendMessage(any(), any())(any())
           verify(mockDestinationConnector, times(0)).sendMessage(any(), any())(any())
           verify(mockGuaranteeConnector, times(1)).sendMessage(any(), any())(any())
+          verify(mockNCTSMonitoringConnector, times(0)).sendMessage(any())(any())
       }
     }
 
@@ -104,16 +201,22 @@ class RoutingServiceSpec extends SpecBase with BeforeAndAfterEach with ScalaChec
       val mockDepartureConnector   = mock[DepartureConnector]
       val mockDestinationConnector = mock[DestinationConnector]
       val mockGuaranteeConnector   = mock[GuaranteeConnector]
+      val mockNCTSMonitoringConnector  = mock[NCTSMonitoringConnector]
+      val mockAppConfig            = mock[AppConfig]
       val messageRecipient         = MessageRecipient.fromHeaderValue("MDTP-DEP-1-1").get
 
       when(mockDestinationConnector.sendMessage(any(), any())(any())).thenReturn(Future.successful(HttpResponse(200, "")))
-      val sut = new RoutingService(mockDestinationConnector, mockDepartureConnector, mockGuaranteeConnector)
+
+      val sut = new RoutingService(
+        mockDestinationConnector, mockDepartureConnector, mockGuaranteeConnector, mockNCTSMonitoringConnector, mockAppConfig
+      )
 
       sut.sendMessage(messageRecipient, messageType, <Abc>123</Abc>)(HeaderCarrier())
 
       verify(mockDepartureConnector, times(1)).sendMessage(any(), any())(any())
       verify(mockDestinationConnector, times(0)).sendMessage(any(), any())(any())
       verify(mockGuaranteeConnector, times(0)).sendMessage(any(), any())(any())
+      verify(mockNCTSMonitoringConnector, times(0)).sendMessage(any())(any())
     }
 
     "use DestinationConnector when forwarding a 917 message with an ARR header" in {
@@ -121,16 +224,22 @@ class RoutingServiceSpec extends SpecBase with BeforeAndAfterEach with ScalaChec
       val mockDepartureConnector   = mock[DepartureConnector]
       val mockDestinationConnector = mock[DestinationConnector]
       val mockGuaranteeConnector   = mock[GuaranteeConnector]
+      val mockNCTSMonitoringConnector  = mock[NCTSMonitoringConnector]
+      val mockAppConfig            = mock[AppConfig]
       val messageRecipient         = MessageRecipient.fromHeaderValue("MDTP-ARR-1-1").get
 
       when(mockDestinationConnector.sendMessage(any(), any())(any())).thenReturn(Future.successful(HttpResponse(200, "")))
-      val sut = new RoutingService(mockDestinationConnector, mockDepartureConnector, mockGuaranteeConnector)
+
+      val sut = new RoutingService(
+        mockDestinationConnector, mockDepartureConnector, mockGuaranteeConnector, mockNCTSMonitoringConnector, mockAppConfig
+      )
 
       sut.sendMessage(messageRecipient, messageType, <Abc>123</Abc>)(HeaderCarrier())
 
       verify(mockDepartureConnector, times(0)).sendMessage(any(), any())(any())
       verify(mockDestinationConnector, times(1)).sendMessage(any(), any())(any())
       verify(mockGuaranteeConnector, times(0)).sendMessage(any(), any())(any())
+      verify(mockNCTSMonitoringConnector, times(0)).sendMessage(any())(any())
     }
 
     "use GuaranteeConnector when forwarding a 917 message with a GUA header" in {
@@ -138,16 +247,22 @@ class RoutingServiceSpec extends SpecBase with BeforeAndAfterEach with ScalaChec
       val mockDepartureConnector   = mock[DepartureConnector]
       val mockDestinationConnector = mock[DestinationConnector]
       val mockGuaranteeConnector   = mock[GuaranteeConnector]
+      val mockNCTSMonitoringConnector  = mock[NCTSMonitoringConnector]
+      val mockAppConfig            = mock[AppConfig]
       val messageRecipient         = MessageRecipient.fromHeaderValue("MDTP-GUA-1-1").get
 
       when(mockGuaranteeConnector.sendMessage(any(), any())(any())).thenReturn(Future.successful(HttpResponse(200, "")))
-      val sut = new RoutingService(mockDestinationConnector, mockDepartureConnector, mockGuaranteeConnector)
+
+      val sut = new RoutingService(
+        mockDestinationConnector, mockDepartureConnector, mockGuaranteeConnector, mockNCTSMonitoringConnector, mockAppConfig
+      )
 
       sut.sendMessage(messageRecipient, messageType, <Abc>123</Abc>)(HeaderCarrier())
 
       verify(mockDepartureConnector, times(0)).sendMessage(any(), any())(any())
       verify(mockDestinationConnector, times(0)).sendMessage(any(), any())(any())
       verify(mockGuaranteeConnector, times(1)).sendMessage(any(), any())(any())
+      verify(mockNCTSMonitoringConnector, times(0)).sendMessage(any())(any())
     }
   }
 }
