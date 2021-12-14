@@ -36,7 +36,7 @@ class NCTSMonitoringConnector @Inject()(
 
   def sendMessage(movement: Movement)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
 
-    val nctsMonitoringUrl = s"${config.nctsMonitoringUrl.baseUrl}/departure-notification"
+    val nctsMonitoringUrl = s"${config.nctsMonitoringUrl.baseUrl}"
 
     http.POSTString[HttpResponse](nctsMonitoringUrl, Json.toJson(movement).toString).map { response =>
       response.status match {
