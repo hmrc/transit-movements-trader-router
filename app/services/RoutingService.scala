@@ -34,7 +34,10 @@ class RoutingService @Inject() (destinationConnector: DestinationConnector, depa
   def sendMessage(messageRecipient: MessageRecipient, messageType: MessageType, messageBody: NodeSeq)(implicit hc: HeaderCarrier): Future[HttpResponse] =
     messageType match {
       case _: ArrivalMessage =>
-        destinationConnector.sendMessage(messageRecipient, messageBody)
+        val response = destinationConnector.sendMessage(messageRecipient, messageBody)
+        if(MessageType.nctsMonitoringArrivalValues.contains(messageType) && appConfig.nctsMonitoringEnabled)
+          nctsMonitoringConnector.sendMessage(Movement(messageRecipient.headerValue, messageType.code, LocalDateTime.now))
+        response
       case _: DepartureMessage =>
         val response = departureConnector.sendMessage(messageRecipient, messageBody)
         if(MessageType.nctsMonitoringDepartureValues.contains(messageType) && appConfig.nctsMonitoringEnabled)
@@ -50,7 +53,10 @@ class RoutingService @Inject() (destinationConnector: DestinationConnector, depa
               nctsMonitoringConnector.sendMessage(Movement(departureRecipient.headerValue, messageType.code, LocalDateTime.now))
             response
           case arrivalRecipient: ArrivalRecipient =>
-            destinationConnector.sendMessage(arrivalRecipient, messageBody)
+            val response = destinationConnector.sendMessage(arrivalRecipient, messageBody)
+            if(MessageType.nctsMonitoringDepartureValues.contains(messageType) && appConfig.nctsMonitoringEnabled)
+              nctsMonitoringConnector.sendMessage(Movement(arrivalRecipient.headerValue, messageType.code, LocalDateTime.now))
+            response
           case guaranteeRecipient: GuaranteeRecipient =>
             guaranteeConnector.sendMessage(guaranteeRecipient, messageBody)
         }

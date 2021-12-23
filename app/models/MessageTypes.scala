@@ -64,6 +64,10 @@ object MessageType {
   val guaranteeValues: Set[GuaranteeMessage] =
     Set(ResponseQueryOnGuarantees)
 
+  val nctsMonitoringArrivalValues: Set[MessageType] =
+    Set(ArrivalRejection, UnloadingPermission, UnloadingRemarksRejection,
+      XMLSubmissionNegativeAcknowledgement, FunctionalNegativeAcknowledgement)
+
   val nctsMonitoringDepartureValues: Set[MessageType] =
     Set(MrnAllocated, DeclarationRejected, CancellationDecision, PositiveAcknowledgement,
       XMLSubmissionNegativeAcknowledgement, FunctionalNegativeAcknowledgement)
