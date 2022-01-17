@@ -37,6 +37,7 @@ trait WireMockServerHandler extends BeforeAndAfterAll with BeforeAndAfterEach {
     new GuiceApplicationBuilder()
       .configure(
         "metrics.jvm" -> false,
+        "microservice.services.features.nctsMonitoringEnabled" -> true,
         portConfigKey -> server.port().toString
       )
       .overrides(bindings: _*)

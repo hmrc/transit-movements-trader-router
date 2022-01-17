@@ -16,38 +16,39 @@
 
 package services
 
-import connectors.DepartureConnector
-import connectors.DestinationConnector
-import connectors.GuaranteeConnector
-import models.ArrivalMessage
-import models.ArrivalRecipient
-import models.DepartureMessage
-import models.DepartureRecipient
-import models.GuaranteeMessage
-import models.GuaranteeRecipient
-import models.MessageRecipient
-import models.MessageType
+import config.AppConfig
+import connectors.{DepartureConnector, DestinationConnector, GuaranteeConnector, NCTSMonitoringConnector}
+import models.{ArrivalMessage, ArrivalRecipient, DepartureMessage, DepartureRecipient, GuaranteeMessage, GuaranteeRecipient, MessageRecipient, MessageType, Movement}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.HttpResponse
 
+import java.time.LocalDateTime
 import javax.inject.Inject
 import scala.concurrent.Future
 import scala.xml.NodeSeq
 
-class RoutingService @Inject() (destinationConnector: DestinationConnector, departureConnector: DepartureConnector, guaranteeConnector: GuaranteeConnector) {
+class RoutingService @Inject() (destinationConnector: DestinationConnector, departureConnector: DepartureConnector,
+                                guaranteeConnector: GuaranteeConnector, nctsMonitoringConnector: NCTSMonitoringConnector,
+                                appConfig: AppConfig) {
 
   def sendMessage(messageRecipient: MessageRecipient, messageType: MessageType, messageBody: NodeSeq)(implicit hc: HeaderCarrier): Future[HttpResponse] =
     messageType match {
       case _: ArrivalMessage =>
         destinationConnector.sendMessage(messageRecipient, messageBody)
       case _: DepartureMessage =>
-        departureConnector.sendMessage(messageRecipient, messageBody)
+        val response = departureConnector.sendMessage(messageRecipient, messageBody)
+        if(MessageType.nctsMonitoringDepartureValues.contains(messageType) && appConfig.nctsMonitoringEnabled)
+          nctsMonitoringConnector.sendMessage(Movement(messageRecipient.headerValue, messageType.code, LocalDateTime.now))
+        response
       case _: GuaranteeMessage =>
         guaranteeConnector.sendMessage(messageRecipient, messageBody)
       case _ =>
         messageRecipient match {
           case departureRecipient: DepartureRecipient =>
-            departureConnector.sendMessage(departureRecipient, messageBody)
+            val response = departureConnector.sendMessage(departureRecipient, messageBody)
+            if(MessageType.nctsMonitoringDepartureValues.contains(messageType) && appConfig.nctsMonitoringEnabled)
+              nctsMonitoringConnector.sendMessage(Movement(departureRecipient.headerValue, messageType.code, LocalDateTime.now))
+            response
           case arrivalRecipient: ArrivalRecipient =>
             destinationConnector.sendMessage(arrivalRecipient, messageBody)
           case guaranteeRecipient: GuaranteeRecipient =>

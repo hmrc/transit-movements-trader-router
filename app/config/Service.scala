@@ -19,10 +19,10 @@ package config
 import play.api.ConfigLoader
 import play.api.Configuration
 
-final case class Service(host: String, port: String, protocol: String, startUrl: String) {
+final case class Service(host: String, port: String, protocol: String, startUrl: String, endUrl: String) {
 
   def baseUrl: String =
-    s"$protocol://$host:$port/$startUrl"
+    s"$protocol://$host:$port/$startUrl$endUrl"
 
   override def toString: String =
     baseUrl
@@ -37,8 +37,9 @@ object Service {
       val port     = service.get[String]("port")
       val protocol = service.get[String]("protocol")
       val startUrl = service.get[String]("startUrl")
+      val endUrl   = service.getOptional[String]("endUrl").getOrElse("")
 
-      Service(host, port, protocol, startUrl)
+      Service(host, port, protocol, startUrl, endUrl)
   }
 
   implicit def convertToString(service: Service): String =

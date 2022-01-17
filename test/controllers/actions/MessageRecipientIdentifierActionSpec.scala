@@ -38,6 +38,7 @@ class MessageRecipientIdentifierActionSpec extends SpecBase with ScalaCheckPrope
 
   private def actionProvider =
     applicationBuilder
+      .configure("microservice.services.features.nctsMonitoringEnabled" -> true)
       .build()
       .injector
       .instanceOf[MessageRecipientIdentifierActionProvider]
