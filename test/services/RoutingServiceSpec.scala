@@ -20,7 +20,7 @@ import base.SpecBase
 import config.AppConfig
 import connectors.{DepartureConnector, DestinationConnector, GuaranteeConnector, NCTSMonitoringConnector}
 import models.{MessageRecipient, MessageType}
-import models.MessageType.{XMLSubmissionNegativeAcknowledgement, nctsMonitoringDepartureValues}
+import models.MessageType.{XMLSubmissionNegativeAcknowledgement, nctsMonitoringArrivalValues, nctsMonitoringDepartureValues}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalacheck.Gen
@@ -35,8 +35,10 @@ class RoutingServiceSpec extends SpecBase with BeforeAndAfterEach with ScalaChec
   val destinationMessageTypes: Gen[MessageType] = Gen.oneOf(MessageType.arrivalValues)
   val departureMessageTypes: Gen[MessageType]   = Gen.oneOf(MessageType.departureValues)
   val guaranteeMessageTypes: Gen[MessageType]   = Gen.oneOf(MessageType.guaranteeValues)
-  val nctsMonitoringDepartureMessageTypes: Gen[MessageType]   = Gen.oneOf(MessageType.nctsMonitoringDepartureValues)
-  val nonNCTSMonitoringDepartureMessageTypes: Gen[MessageType]   = Gen.oneOf(MessageType.validMessages.diff(nctsMonitoringDepartureValues))
+  val nctsMonitoringMessageTypes: Gen[MessageType]   =
+    Gen.oneOf(MessageType.nctsMonitoringDepartureValues ++ MessageType.nctsMonitoringArrivalValues)
+  val nonNCTSMonitoringMessageTypes: Gen[MessageType]   =
+    Gen.oneOf(MessageType.validMessages.diff(nctsMonitoringDepartureValues ++ nctsMonitoringArrivalValues))
 
   "sendMessage must" - {
     "use DepartureConnector when forwarding a Departure Message" in {
@@ -67,9 +69,9 @@ class RoutingServiceSpec extends SpecBase with BeforeAndAfterEach with ScalaChec
       }
     }
 
-    "use NCTSMonitoringConnector when forwarding a Departure Message if the message type is relevant" in {
+    "use NCTSMonitoringConnector when forwarding a message if the message type is relevant to NCTS monitoring" in {
 
-      forAll(nctsMonitoringDepartureMessageTypes) {
+      forAll(nctsMonitoringMessageTypes) {
         messageType =>
           val mockDepartureConnector   = mock[DepartureConnector]
           val mockDestinationConnector = mock[DestinationConnector]
@@ -92,9 +94,9 @@ class RoutingServiceSpec extends SpecBase with BeforeAndAfterEach with ScalaChec
       }
     }
 
-    "not use NCTSMonitoringConnector when forwarding a Departure Message if the message type is irrelevant" in {
+    "not use NCTSMonitoringConnector when forwarding a message if the message type is not relevant to NCTS monitoring" in {
 
-      forAll(nonNCTSMonitoringDepartureMessageTypes) {
+      forAll(nonNCTSMonitoringMessageTypes) {
         messageType =>
           val mockDepartureConnector   = mock[DepartureConnector]
           val mockDestinationConnector = mock[DestinationConnector]
@@ -166,7 +168,6 @@ class RoutingServiceSpec extends SpecBase with BeforeAndAfterEach with ScalaChec
           verify(mockDepartureConnector, times(0)).sendMessage(any(), any())(any())
           verify(mockDestinationConnector, times(1)).sendMessage(any(), any())(any())
           verify(mockGuaranteeConnector, times(0)).sendMessage(any(), any())(any())
-          verify(mockNCTSMonitoringConnector, times(0)).sendMessage(any())(any())
       }
     }
 
