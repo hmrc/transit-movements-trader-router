@@ -41,7 +41,7 @@ class NCTSMonitoringConnectorSpec
     with ScalaCheckPropertyChecks
     with MockitoSugar {
 
-  private val startUrl = "transits-movements-trader-at-departure-stub/departure-notification"
+  private val startUrl = "ncts/response-notification"
   val xMessageRecipient = "MDTP-DEP-1-1"
   val messageRecipient: MessageRecipient = MessageRecipient.fromHeaderValue(xMessageRecipient).get
 
