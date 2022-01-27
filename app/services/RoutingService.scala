@@ -54,7 +54,7 @@ class RoutingService @Inject() (destinationConnector: DestinationConnector, depa
             response
           case arrivalRecipient: ArrivalRecipient =>
             val response = destinationConnector.sendMessage(arrivalRecipient, messageBody)
-            if(MessageType.nctsMonitoringDepartureValues.contains(messageType) && appConfig.nctsMonitoringEnabled)
+            if(MessageType.nctsMonitoringArrivalValues.contains(messageType) && appConfig.nctsMonitoringEnabled)
               nctsMonitoringConnector.sendMessage(Movement(arrivalRecipient.headerValue, messageType.code, LocalDateTime.now))
             response
           case guaranteeRecipient: GuaranteeRecipient =>
