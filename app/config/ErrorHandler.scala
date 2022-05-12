@@ -20,16 +20,14 @@ import logging.Logging
 import play.api.Configuration
 import play.api.http.HeaderNames
 import play.api.libs.json.Json
-import play.api.mvc.RequestHeader
-import play.api.mvc.Result
+import play.api.mvc.{RequestHeader, Result}
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.bootstrap.backend.http.JsonErrorHandler
 import uk.gov.hmrc.play.bootstrap.config.HttpAuditEvent
 import utils.HttpHeaders
 
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class ErrorHandler @Inject() (auditConnector: AuditConnector, httpAuditEvent: HttpAuditEvent, configuration: Configuration)(implicit ec: ExecutionContext)
     extends JsonErrorHandler(auditConnector, httpAuditEvent, configuration)
@@ -41,7 +39,8 @@ class ErrorHandler @Inject() (auditConnector: AuditConnector, httpAuditEvent: Ht
       "request-method"  -> rh.method,
       "request-uri"     -> rh.uri,
       "response-status" -> (statusCode + ""),
-      "error-message"   -> message
+      "error-message"   -> message,
+      "body-size"-> rh.headers.get(HeaderNames.CONTENT_LENGTH).getOrElse("No content length")
     ).++(headers(rh))
 
     val json = Json.toJson(details)
