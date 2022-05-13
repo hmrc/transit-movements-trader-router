@@ -50,10 +50,14 @@ class MessageController @Inject() (
     withMetricsTimerAction(HandleMessage) {
       (messageRecipientIdentifier() andThen messageTypeIdentifier() andThen analyseMessage()).async(parse.xml) {
         implicit request =>
+          logger.debug("routing message")
+
           routingService
             .sendMessage(request.messageRecipient, request.messageType, request.body)
             .map {
               response =>
+                logger.debug(s"routing service response ${response.status} ${response.body}")
+
                 response.status match {
                   case status if is2xx(status) =>
                     response.header(LOCATION) match {
