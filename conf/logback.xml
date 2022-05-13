@@ -47,7 +47,7 @@
 
     <logger name="uk.gov" level="WARN"/>
 
-    <logger name="application" level="WARN"/>
+    <logger name="application" level="DEBUG"/>
 
     <logger name="application.controllers.actions" level="${logger.connector:-WARN}"/>
     <logger name="application.filters.LoggingFilter" level="${logger.connector:-INFO}"/>
