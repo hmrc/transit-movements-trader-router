@@ -39,8 +39,7 @@ class ErrorHandler @Inject() (auditConnector: AuditConnector, httpAuditEvent: Ht
       "request-method"  -> rh.method,
       "request-uri"     -> rh.uri,
       "response-status" -> (statusCode + ""),
-      "error-message"   -> message,
-      "body-size"-> rh.headers.get(HeaderNames.CONTENT_LENGTH).getOrElse("No content length")
+      "error-message"   -> message
     ).++(headers(rh))
 
     val json = Json.toJson(details)
@@ -67,6 +66,7 @@ class ErrorHandler @Inject() (auditConnector: AuditConnector, httpAuditEvent: Ht
       HttpHeaders.X_REQUEST_ID        -> rh.headers.get(HttpHeaders.X_REQUEST_ID).getOrElse("undefined"),
       HttpHeaders.X_MESSAGE_TYPE      -> rh.headers.get(HttpHeaders.X_MESSAGE_TYPE).getOrElse("undefined"),
       HttpHeaders.X_MESSAGE_RECIPIENT -> rh.headers.get(HttpHeaders.X_MESSAGE_RECIPIENT).getOrElse("undefined"),
-      HeaderNames.CONTENT_TYPE        -> rh.headers.get(HeaderNames.CONTENT_TYPE).getOrElse("undefined")
+      HeaderNames.CONTENT_TYPE        -> rh.headers.get(HeaderNames.CONTENT_TYPE).getOrElse("undefined"),
+      HeaderNames.CONTENT_LENGTH      -> rh.headers.get(HeaderNames.CONTENT_LENGTH).getOrElse("undefined")
     )
 }
