@@ -20,16 +20,14 @@ import logging.Logging
 import play.api.Configuration
 import play.api.http.HeaderNames
 import play.api.libs.json.Json
-import play.api.mvc.RequestHeader
-import play.api.mvc.Result
+import play.api.mvc.{RequestHeader, Result}
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.bootstrap.backend.http.JsonErrorHandler
 import uk.gov.hmrc.play.bootstrap.config.HttpAuditEvent
 import utils.HttpHeaders
 
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class ErrorHandler @Inject() (auditConnector: AuditConnector, httpAuditEvent: HttpAuditEvent, configuration: Configuration)(implicit ec: ExecutionContext)
     extends JsonErrorHandler(auditConnector, httpAuditEvent, configuration)
@@ -68,6 +66,7 @@ class ErrorHandler @Inject() (auditConnector: AuditConnector, httpAuditEvent: Ht
       HttpHeaders.X_REQUEST_ID        -> rh.headers.get(HttpHeaders.X_REQUEST_ID).getOrElse("undefined"),
       HttpHeaders.X_MESSAGE_TYPE      -> rh.headers.get(HttpHeaders.X_MESSAGE_TYPE).getOrElse("undefined"),
       HttpHeaders.X_MESSAGE_RECIPIENT -> rh.headers.get(HttpHeaders.X_MESSAGE_RECIPIENT).getOrElse("undefined"),
-      HeaderNames.CONTENT_TYPE        -> rh.headers.get(HeaderNames.CONTENT_TYPE).getOrElse("undefined")
+      HeaderNames.CONTENT_TYPE        -> rh.headers.get(HeaderNames.CONTENT_TYPE).getOrElse("undefined"),
+      HeaderNames.CONTENT_LENGTH      -> rh.headers.get(HeaderNames.CONTENT_LENGTH).getOrElse("undefined")
     )
 }
