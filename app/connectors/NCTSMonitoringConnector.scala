@@ -16,7 +16,7 @@
 
 package connectors
 
-import com.kenshoo.play.metrics.Metrics
+import com.codahale.metrics.MetricRegistry
 import config.AppConfig
 import logging.Logging
 import metrics.HasMetrics
@@ -30,7 +30,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class NCTSMonitoringConnector @Inject()(
   config: AppConfig,
   http: HttpClient,
-  val metrics: Metrics
+  val metrics: MetricRegistry
 )(implicit ec: ExecutionContext)
     extends HasMetrics with Logging {
 

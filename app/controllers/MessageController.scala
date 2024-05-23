@@ -16,7 +16,7 @@
 
 package controllers
 
-import com.kenshoo.play.metrics.Metrics
+import com.codahale.metrics.MetricRegistry
 import controllers.actions.{AnalyseMessageActionProvider, MessageRecipientIdentifierActionProvider, MessageTypeIdentifierActionProvider}
 import logging.Logging
 import metrics.HasActionMetrics
@@ -36,7 +36,7 @@ class MessageController @Inject() (
   cc: ControllerComponents,
   routingService: RoutingService,
   analyseMessage: AnalyseMessageActionProvider,
-  val metrics: Metrics
+  val metrics: MetricRegistry
 )(implicit val ec: ExecutionContext)
     extends BackendController(cc)
     with HttpErrorFunctions

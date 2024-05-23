@@ -16,9 +16,9 @@
 
 package filters
 
-import akka.stream.Materializer
-import akka.stream.scaladsl.Sink
-import akka.util.ByteString
+import org.apache.pekko.stream.Materializer
+import org.apache.pekko.stream.scaladsl.Sink
+import org.apache.pekko.util.ByteString
 import logging.Logging
 import play.api.http.HeaderNames
 import play.api.http.Status

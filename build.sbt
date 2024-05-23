@@ -4,20 +4,15 @@ import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin
 val appName = "transit-movements-trader-router"
 
 lazy val microservice = Project(appName, file("."))
-  .configs(IntegrationTest)
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
   .disablePlugins(JUnitXmlReportPlugin) //Required to prevent https://github.com/scalatest/scalatest/issues/1427
-  .settings(SbtDistributablesPlugin.publishingSettings)
-  .settings(DefaultBuildSettings.integrationTestSettings())
   .settings(inThisBuild(buildSettings))
   .settings(inConfig(Test)(testSettings))
-  .settings(inConfig(IntegrationTest)(ScalafmtPlugin.scalafmtConfigSettings))
-  .settings(inConfig(IntegrationTest)(scalafixConfigSettings(IntegrationTest)))
   .settings(scalacSettings)
   .settings(ScoverageSettings())
   .settings(
     majorVersion := 0,
-    scalaVersion := "2.12.14",
+    scalaVersion := "2.13.12",
     PlayKeys.playDefaultPort := 9486,
     resolvers += Resolver.jcenterRepo,
     semanticdbEnabled := true,
