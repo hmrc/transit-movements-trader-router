@@ -16,7 +16,7 @@
 
 package utils.analysis
 
-import com.codahale.metrics.Histogram
+import com.codahale.metrics.{Histogram, MetricRegistry}
 import data.TestXml
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
@@ -24,11 +24,10 @@ import org.scalatest.BeforeAndAfterEach
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
-import utils.TestMetrics
 
 class MessageAnalyserSpec extends AnyFreeSpec with Matchers with MockitoSugar with TestXml with BeforeAndAfterEach {
 
-  private val analyser = new MessageAnalyser(new TestMetrics) {
+  private val analyser = new MessageAnalyser(new MetricRegistry) {
     override lazy val messageSize: Histogram             = mock[Histogram]
     override lazy val numberOfGoods: Histogram           = mock[Histogram]
     override lazy val numberOfDocuments: Histogram       = mock[Histogram]

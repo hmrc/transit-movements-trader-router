@@ -16,15 +16,12 @@
 
 package controllers
 
-import com.kenshoo.play.metrics.Metrics
-import controllers.actions.AnalyseMessageActionProvider
-import controllers.actions.MessageRecipientIdentifierActionProvider
-import controllers.actions.MessageTypeIdentifierActionProvider
+import com.codahale.metrics.MetricRegistry
+import controllers.actions.{AnalyseMessageActionProvider, MessageRecipientIdentifierActionProvider, MessageTypeIdentifierActionProvider}
 import logging.Logging
 import metrics.HasActionMetrics
 import metrics.MetricsKeys.Endpoints._
-import play.api.mvc.Action
-import play.api.mvc.ControllerComponents
+import play.api.mvc.{Action, ControllerComponents}
 import services.RoutingService
 import uk.gov.hmrc.http.HttpErrorFunctions
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
@@ -39,7 +36,7 @@ class MessageController @Inject() (
   cc: ControllerComponents,
   routingService: RoutingService,
   analyseMessage: AnalyseMessageActionProvider,
-  val metrics: Metrics
+  val metrics: MetricRegistry
 )(implicit val ec: ExecutionContext)
     extends BackendController(cc)
     with HttpErrorFunctions
@@ -74,7 +71,8 @@ class MessageController @Inject() (
                   case 400 =>
                     logger.warn("Incoming Router Rejected: Downstream service rejected with no message")
                     BadRequest
-                  case _ => Status(response.status)
+                  case _ =>  logger.warn("Incoming Router Rejected: Unknown error occurred")
+                    Status(response.status)
                 }
             }
       }

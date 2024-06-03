@@ -17,7 +17,6 @@
 package metrics
 
 import com.codahale.metrics.MetricRegistry
-import com.kenshoo.play.metrics.Metrics
 import play.api.mvc.Action
 import play.api.mvc.BaseController
 import play.api.mvc.Result
@@ -47,17 +46,15 @@ trait HasActionMetrics extends HasMetrics {
 }
 
 trait HasMetrics {
-  def metrics: Metrics
-
-  lazy val registry: MetricRegistry = metrics.defaultRegistry
+  def metrics: MetricRegistry
 
   def histo(metricKey: String) =
-    registry.histogram(metricKey)
+    metrics.histogram(metricKey)
 
   class MetricsTimer(metricKey: String) {
-    val timerContext   = registry.timer(s"$metricKey-timer").time()
-    val successCounter = registry.counter(s"$metricKey-success-counter")
-    val failureCounter = registry.counter(s"$metricKey-failed-counter")
+    val timerContext   = metrics.timer(s"$metricKey-timer").time()
+    val successCounter = metrics.counter(s"$metricKey-success-counter")
+    val failureCounter = metrics.counter(s"$metricKey-failed-counter")
     val timerRunning   = new AtomicBoolean(true)
 
     def completeWithSuccess(): Unit =

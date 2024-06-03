@@ -16,7 +16,7 @@
 
 package connectors
 
-import com.kenshoo.play.metrics.Metrics
+import com.codahale.metrics.MetricRegistry
 import config.AppConfig
 import metrics.HasMetrics
 import metrics.MetricsKeys.Connectors._
@@ -34,7 +34,7 @@ import scala.xml.NodeSeq
 class DepartureConnector @Inject() (
   config: AppConfig,
   http: HttpClient,
-  val metrics: Metrics
+  val metrics: MetricRegistry
 )(implicit ec: ExecutionContext)
     extends HasMetrics {
 

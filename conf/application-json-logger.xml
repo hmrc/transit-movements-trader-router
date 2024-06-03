@@ -5,14 +5,14 @@
         <encoder class="uk.gov.hmrc.play.logging.JsonEncoder"/>
     </appender>
 
-    <logger name="application.config" level="${logger.config:-WARN}"/>
+    <logger name="application.config" level="WARN"/>
 
-    <logger name="uk.gov" level="${logger.uk.gov:-WARN}"/>
-    <logger name="application.controllers" level="${logger.connector:-WARN}"/>
-    <logger name="application.filters.LoggingFilter" level="${logger.connector:-INFO}"/>
-    <logger name="application.connectors" level="${logger.connector:-WARN}"/>
+    <logger name="uk.gov" level="WARN"/>
+    <logger name="application.controllers" level="WARN"/>
+    <logger name="application.filters.LoggingFilter" level="INFO"/>
+    <logger name="application.connectors" level="WARN"/>
 
-    <root level="${logger.application:-WARN}">
+    <root level="WARN">
         <appender-ref ref="STDOUT"/>
     </root>
 </configuration>
